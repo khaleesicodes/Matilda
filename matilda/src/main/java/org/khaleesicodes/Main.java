@@ -9,10 +9,26 @@ import java.io.IOException;
 public class Main {
 
     public static void main(String[] args) throws IOException, AttachNotSupportedException, AgentLoadException, AgentInitializationException {
-        System.out.println("Hello world!");
-        // Test statement to check if System exec is blocked
-        System.exit(-1);
+        System.out.println("__________START__________");
 
-        System.out.println("foobar");
+
+        try{
+            System.out.println("try running exec");
+            Runtime.getRuntime().exec("foo");
+            throw new Error("FAILED");
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+        }
+        // Test statement to check if System exec is blocked
+
+        try{
+            System.out.println("try running EXIT");
+            System.exit(-1);
+            throw new Error("FAILED");
+        } catch(RuntimeException e){
+            e.printStackTrace();
+        }
+
+        System.out.println("__________END__________");
     }
 }
