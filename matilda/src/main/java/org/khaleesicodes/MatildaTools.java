@@ -90,18 +90,44 @@ public class MatildaTools {
     static class NetworkSocketTransformer implements MatildaCodeTransformer {
         @Override
         public Predicate<CodeElement> getTransformPredicate() {
-            return null;
+            System.out.println("Getting TransformerPredicate");
+            return codeElement ->
+                    codeElement instanceof InvokeInstruction i
+                            && i.opcode() == Opcode.INVOKEVIRTUAL
+                            && "java/net/Socket".equals(i.owner().asInternalName())
+                            && "start".equals(i.name().stringValue());
+                           // && "([Ljava/lang/ProcessBuilder$Redirect;)Ljava/lang/Process;".equals(i.type().stringValue());
         }
 
         @Override
         public CodeTransform getTransform(AtomicBoolean modified) {
-            return null;
+            System.out.println("Getting Transformer");
+            Predicate<CodeElement> predicate = getTransformPredicate();
+            return (codeBuilder, codeElement) -> {
+                if (predicate.test(codeElement)) {
+                    /*
+                     * Rewrite every invokestatic of System::exit(int) to an athrow of RuntimeException.
+                     */
+                    var runtimeException = ClassDesc.of("java.lang.RuntimeException");
+                    codeBuilder.new_(runtimeException)
+                            .dup()
+                            .ldc("Socket not allowed")
+                            .invokespecial(runtimeException,
+                                    "<init>",
+                                    MethodTypeDesc.ofDescriptor("(Ljava/lang/String;)V"),
+                                    false)
+                            .athrow();
+                    modified.set(true);
+                } else {
+                    codeBuilder.with(codeElement);
+                }
+            };
         }
 
     }
 
     public static class CombinedTransformer implements MatildaCodeTransformer {
-        private final List<MatildaCodeTransformer> transformer = List.of(new SystemExitTransformer(), new SystemExecTransformer());
+        private final List<MatildaCodeTransformer> transformer = List.of(new SystemExitTransformer(), new SystemExecTransformer(), new NetworkSocketTransformer());
 
         @Override
         public Predicate<CodeElement> getTransformPredicate() {

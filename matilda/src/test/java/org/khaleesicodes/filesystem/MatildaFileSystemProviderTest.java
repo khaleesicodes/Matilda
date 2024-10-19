@@ -10,7 +10,7 @@ class MatildaFileSystemProviderTest {
     void testNewInputStream() {
 
         MatildaFileSystemProvider provider = new MatildaFileSystemProvider(null, null);
-        provider.getFileSystem()
+        //provider.getFileSystem();
     }
 
     @Test

@@ -18,8 +18,8 @@ public class AgentMatilda {
                 // needs to be done separately because JVM can not exit
                  if (loader != null && loader != ClassLoader.getPlatformClassLoader()) {
                     return processClasses(classBytes, new MatildaTools.SystemExitTransformer());
-                } else {
-                     return processClasses(classBytes, new MatildaTools.SystemExecTransformer());
+               } else {
+                     return processClasses(classBytes, new MatildaTools.NetworkSocketTransformer());
                 }
             }
         };
