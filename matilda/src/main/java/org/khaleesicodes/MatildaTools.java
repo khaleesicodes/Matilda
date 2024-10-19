@@ -90,18 +90,16 @@ public class MatildaTools {
     static class NetworkSocketTransformer implements MatildaCodeTransformer {
         @Override
         public Predicate<CodeElement> getTransformPredicate() {
-            System.out.println("Getting TransformerPredicate");
             return codeElement ->
                     codeElement instanceof InvokeInstruction i
                             && i.opcode() == Opcode.INVOKEVIRTUAL
                             && "java/net/Socket".equals(i.owner().asInternalName())
-                            && "start".equals(i.name().stringValue());
-                           // && "([Ljava/lang/ProcessBuilder$Redirect;)Ljava/lang/Process;".equals(i.type().stringValue());
+                            && "connect".equals(i.name().stringValue())
+                            && "(Ljava/net/SocketAddress;)V".equals(i.type().stringValue());
         }
 
         @Override
         public CodeTransform getTransform(AtomicBoolean modified) {
-            System.out.println("Getting Transformer");
             Predicate<CodeElement> predicate = getTransformPredicate();
             return (codeBuilder, codeElement) -> {
                 if (predicate.test(codeElement)) {
@@ -127,7 +125,7 @@ public class MatildaTools {
     }
 
     public static class CombinedTransformer implements MatildaCodeTransformer {
-        private final List<MatildaCodeTransformer> transformer = List.of(new SystemExitTransformer(), new SystemExecTransformer(), new NetworkSocketTransformer());
+        private final List<MatildaCodeTransformer> transformer = List.of(new SystemExecTransformer(), new NetworkSocketTransformer());
 
         @Override
         public Predicate<CodeElement> getTransformPredicate() {
