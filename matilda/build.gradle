@@ -19,11 +19,13 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 tasks.withType(Test).configureEach {
-    jvmArgs += "--enable-preview"
+    jvmArgs += ["--enable-preview","-javaagent:/Users/khaleesi/Bachelor/Matilda/matilda/build/libs/matilda-1.0-SNAPSHOT.jar"]
+
 }
 
 tasks.withType(JavaExec).configureEach {
     jvmArgs += "--enable-preview"
+
 }
 
 jar {
@@ -35,6 +37,6 @@ jar {
     }
 }
 test {
-    jvmArgs(['--enable-preview'])
+    jvmArgs += ["--enable-preview","-javaagent:/Users/khaleesi/Bachelor/Matilda/matilda/build/libs/matilda-1.0-SNAPSHOT.jar"]
     useJUnitPlatform()
 }

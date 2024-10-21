@@ -1,42 +1,70 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.khaleesicodes;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
-import java.io.StringWriter;
-import java.lang.instrument.Instrumentation;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.io.InputStream;
+import java.net.Socket;
+import java.net.URL;
+import java.net.URLConnection;
 
 
 public class AgentMatildaTest {
     @Test
-    public void testModifyMethod() throws IOException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+    public void testSystemExitTransformer()  {
 
-        // now that we are done rewriting we try to invoke the new class method loading it with a custom
-        // class loader to avoid letting the standard class loader load the unchanged class
-        class MyClassLoader extends ClassLoader {
-            public Class defineClass(String name, byte[] b) {
-                return defineClass(name, b, 0, b.length);
-            }
-        }
 
-        byte[] classBytes = AgentMatildaTest.class.getClassLoader().getResourceAsStream(ProcessBuilder.class.getName().replace('.', '/').concat(".class")).readAllBytes();
-        byte[] rewrittenClassContent = AgentMatilda.processClasses(classBytes, new SystemExecTransformer());
-        Class c = new MyClassLoader()
-                .defineClass(ProcessBuilder.class.getName(), rewrittenClassContent);
-        Object o = c.getConstructor().newInstance();
-
-        Method startMethod = c.getMethod("start");
         RuntimeException uOE = Assertions.assertThrows(RuntimeException.class, () -> {
-            try {
-                startMethod.invoke(o);
-            } catch (InvocationTargetException ex) {
-                throw ex.getCause(); // get the original exception we don't care about the exception from reflection API
-            }
+            System.exit(-1);
         });
-        Assertions.assertEquals("Process Execution not allowed", uOE.getMessage());
+        Assertions.assertEquals("System.exit not allowed", uOE.getMessage());
+
     }
 
+    @Test
+    public void testSystemExecTransformer()  {
+
+        RuntimeException uOE = Assertions.assertThrows(RuntimeException.class, () -> {
+            Runtime.getRuntime().exec("foo");
+        });
+        Assertions.assertEquals("ProceesBuilder.start(...) not allowed", uOE.getMessage());
+    }
+
+    @Test
+    public void openSocketTest() {
+        RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> {
+            Socket socket = new Socket("localhost", 9999);
+        });
+        Assertions.assertEquals("Socket not allowed", exception.getMessage());
+
+    }
+
+    @Test
+    public void openURLTest() {
+        String url = "https://google.com";
+        RuntimeException exception_url = Assertions.assertThrows(RuntimeException.class, () -> {
+            URLConnection connection = new URL(url).openConnection();
+            connection.setRequestProperty("Accept-Charset", "text/html");
+            InputStream response = connection.getInputStream();
+
+        });
+        Assertions.assertEquals("Socket not allowed", exception_url.getMessage());
+
+    }
 }
