@@ -124,14 +124,17 @@ public class MatildaTools {
 
     }
 
+    //TODO Fix combined Transformer
     public static class CombinedTransformer implements MatildaCodeTransformer {
-        private final List<MatildaCodeTransformer> transformer = List.of(new SystemExecTransformer(), new NetworkSocketTransformer());
+        private final List<MatildaCodeTransformer> transformer = List.of(new NetworkSocketTransformer());
 
         @Override
         public Predicate<CodeElement> getTransformPredicate() {
             return codeElement -> {
                 for (MatildaCodeTransformer transformer : transformer) {
                     if (transformer.getTransformPredicate().test(codeElement)) {
+                        System.out.println("Predicatematch: ");
+                        System.out.println(transformer + " " + codeElement);
                         return true;
                     }
                 }
@@ -144,6 +147,8 @@ public class MatildaTools {
             return (codeBuilder, codeElement) ->{
                 for (MatildaCodeTransformer transformer : transformer) {
                     if (transformer.getTransformPredicate().test(codeElement)) {
+                        System.out.println("Transformermatch: ");
+                        System.out.println(transformer + " " + codeElement);
                         transformer.getTransform(modified).accept(codeBuilder, codeElement);
                         return;
                     }

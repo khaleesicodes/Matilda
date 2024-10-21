@@ -22,8 +22,6 @@ tasks.withType(Test).configureEach {
     jvmArgs += "--enable-preview"
 }
 
-
-
 tasks.withType(JavaExec).configureEach {
     jvmArgs += "--enable-preview"
 }
@@ -32,8 +30,8 @@ jar {
     manifest {
         attributes(
                 "Premain-Class": "org.khaleesicodes.AgentMatilda",
-                "Main-Class": "org.khaleesicodes.Main",
-                "Can-Retransform-Classes": true)
+                "Can-Retransform-Classes": true
+        )
     }
 }
 test {
