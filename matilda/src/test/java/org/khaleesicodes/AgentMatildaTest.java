@@ -23,7 +23,7 @@ public class AgentMatildaTest {
         }
 
         byte[] classBytes = AgentMatildaTest.class.getClassLoader().getResourceAsStream(ProcessBuilder.class.getName().replace('.', '/').concat(".class")).readAllBytes();
-        byte[] rewrittenClassContent = AgentMatilda.processClasses(classBytes, new MatildaTools.SystemExecTransformer());
+        byte[] rewrittenClassContent = AgentMatilda.processClasses(classBytes, new SystemExecTransformer());
         Class c = new MyClassLoader()
                 .defineClass(ProcessBuilder.class.getName(), rewrittenClassContent);
         Object o = c.getConstructor().newInstance();

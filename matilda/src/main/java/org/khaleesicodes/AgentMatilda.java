@@ -3,12 +3,16 @@ import module java.base;
 import module java.instrument;
 
 public class AgentMatilda {
-    /*
+    /**
+     *
      * Before the application starts, register a transformer of class files.
      * Transformer works per class
+     * @param agentArgs
+     * @param inst
+     * @throws UnmodifiableClassException
      */
     public static void premain(String agentArgs, Instrumentation inst) throws UnmodifiableClassException {
-        var transformer = new ClassFileTransformer() {
+        var sysExitTransformer = new ClassFileTransformer() {
             @Override
             public byte[] transform(ClassLoader      loader,
                                     String           className,
@@ -18,15 +22,15 @@ public class AgentMatilda {
                 if (className.equals("java/net/Socket")){
                     System.out.println("Loaded Socket Class as Exit Transformer");
                 }
-                // needs to be done separately because JVM can not exit
+                // needs to be done separately because if PlatformClassLoader is rewritte JVM can not exit when program is finished
                  if (loader != null && loader != ClassLoader.getPlatformClassLoader()) {
-                    return processClasses(classBytes, new MatildaTools.SystemExitTransformer());
+                    return processClasses(classBytes, new SystemExitTransformer());
                } else {
                      return null;
                 }
             }
         };
-        inst.addTransformer(transformer, true);
+        inst.addTransformer(sysExitTransformer, true);
         var sysExecTransformer = new ClassFileTransformer() {
             @Override
             public byte[] transform(ClassLoader      loader,
@@ -41,12 +45,13 @@ public class AgentMatilda {
                 if (loader != null && loader != ClassLoader.getPlatformClassLoader()) {
                     return null;
                 } else {
-                    return processClasses(classBytes, new MatildaTools.SystemExecTransformer());
+                    return processClasses(classBytes, new SystemExecTransformer());
 
                     }
               }
         };
         inst.addTransformer(sysExecTransformer, true);
+
 
         var socketTransformer = new ClassFileTransformer() {
             @Override
@@ -60,7 +65,7 @@ public class AgentMatilda {
                     System.out.println("Yay, you used the right transformer");
                 }
 
-                return processClasses(classBytes, new MatildaTools.NetworkSocketTransformer());
+                return processClasses(classBytes, new NetworkSocketTransformer());
 
             }
         };
@@ -69,7 +74,7 @@ public class AgentMatilda {
     }
 
     @SuppressWarnings("preview")
-    private static ClassTransform getClassTransform(AtomicBoolean modified, MatildaTools.MatildaCodeTransformer transformer) {
+    private static ClassTransform getClassTransform(AtomicBoolean modified, MatildaCodeTransformer transformer) {
         Predicate<CodeElement> predicate = transformer.getTransformPredicate();
         CodeTransform rewriteSystemExit = transformer.getTransform(modified);
         Predicate<MethodModel> invokesSystemExit =
@@ -81,7 +86,7 @@ public class AgentMatilda {
     }
 
     @SuppressWarnings("preview")
-    static byte[] processClasses(byte[] classBytes, MatildaTools.MatildaCodeTransformer transformer) {
+    static byte[] processClasses(byte[] classBytes, MatildaCodeTransformer transformer) {
         var modified = new AtomicBoolean();
         ClassFile cf = ClassFile.of(ClassFile.DebugElementsOption.DROP_DEBUG);
         ClassModel classModel = cf.parse(classBytes);
