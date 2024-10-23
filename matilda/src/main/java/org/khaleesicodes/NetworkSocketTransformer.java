@@ -24,11 +24,14 @@ import java.lang.constant.ClassDesc;
 import java.lang.constant.MethodTypeDesc;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
+import java.util.logging.Logger;
 
 @SuppressWarnings("preview")
 public class NetworkSocketTransformer implements MatildaCodeTransformer{
+
     /**
-     * Transforms java.net.Socket class in order to supress any execution of Socket methods
+     * Matches CodeElement (Instruction) against elements specific to the java.net.Socket connect() and returns true accordingly
+     * A CodeModel describes a Code attribute; we can iterate over its CodeElements and handle those that include symbolic references to other types (JEP466)
      * @return
      */
     @Override
@@ -41,17 +44,21 @@ public class NetworkSocketTransformer implements MatildaCodeTransformer{
                         && "(Ljava/net/SocketAddress;)V".equals(i.type().stringValue());
     }
 
+    /**
+     * Transforms connect method  so that it throws a runtime exception
+     * @param modified
+     * @return
+     */
     @Override
     public CodeTransform getTransform(AtomicBoolean modified) {
+        //TODO find out if whole class or just specific method is being rewritten
         Predicate<CodeElement> predicate = getTransformPredicate();
         return (codeBuilder, codeElement) -> {
             if (predicate.test(codeElement)) {
-                /*
-                 * Rewrite every invokestatic of System::exit(int) to an athrow of RuntimeException.
-                 */
                 var runtimeException = ClassDesc.of("java.lang.RuntimeException");
                 codeBuilder.new_(runtimeException)
                         .dup()
+                        //TODO Throw elaborate exception, issue: how to get class path?
                         .ldc("Socket not allowed")
                         .invokespecial(runtimeException,
                                 "<init>",

@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -19,7 +19,9 @@ package org.khaleesicodes;
 import module java.base;
 import module java.instrument;
 
+
 public class AgentMatilda {
+
     /**
      *
      * Agent class that initiates all transformers
@@ -28,7 +30,15 @@ public class AgentMatilda {
      * @param inst
      * @throws UnmodifiableClassException
      */
-    public static void premain(String agentArgs, Instrumentation inst) throws UnmodifiableClassException {
+    public static void premain(String agentArgs, Instrumentation inst) throws UnmodifiableClassException, IOException {
+        var bootStrapJarPath = System.getProperty("matilda.bootstrap.jar");
+        if (bootStrapJarPath == null) {
+            throw new IllegalStateException("No matilda.bootstrap.jar file specified");
+        }
+
+        JarFile bootstrapJar = new JarFile(bootStrapJarPath);
+
+
         var sysExitTransformer = new ClassFileTransformer() {
             @Override
             public byte[] transform(ClassLoader      loader,
@@ -75,6 +85,7 @@ public class AgentMatilda {
         };
         inst.addTransformer(socketTransformer, true);
         inst.retransformClasses(Socket.class, System.class, ProcessBuilder.class);
+        inst.appendToBootstrapClassLoaderSearch(bootstrapJar);
     }
 
     @SuppressWarnings("preview")
