@@ -16,6 +16,8 @@
  */
 package org.khaleesicodes;
 
+import org.khaleesicodes.bootstrap.MatildaAccessControl;
+
 import java.lang.classfile.CodeElement;
 import java.lang.classfile.CodeTransform;
 import java.lang.classfile.Opcode;
@@ -24,6 +26,7 @@ import java.lang.constant.ClassDesc;
 import java.lang.constant.MethodTypeDesc;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @SuppressWarnings("preview")
@@ -52,19 +55,17 @@ public class NetworkSocketTransformer implements MatildaCodeTransformer{
     @Override
     public CodeTransform getTransform(AtomicBoolean modified) {
         //TODO find out if whole class or just specific method is being rewritten
+        //TODO Check why tranform doesn't work for url connect
         Predicate<CodeElement> predicate = getTransformPredicate();
         return (codeBuilder, codeElement) -> {
             if (predicate.test(codeElement)) {
-                var runtimeException = ClassDesc.of("java.lang.RuntimeException");
-                codeBuilder.new_(runtimeException)
-                        .dup()
-                        //TODO Throw elaborate exception, issue: how to get class path?
-                        .ldc("Socket not allowed")
-                        .invokespecial(runtimeException,
-                                "<init>",
-                                MethodTypeDesc.ofDescriptor("(Ljava/lang/String;)V"),
-                                false)
-                        .athrow();
+                Logger.getLogger(NetworkSocketTransformer.class.getName()).log(Level.WARNING, "transform Socket.connect");
+                var accessControl = ClassDesc.of("org.khaleesicodes.bootstrap.MatildaAccessControl");
+                var methodTypeDesc = MethodTypeDesc.ofDescriptor("(Ljava/lang/String;)V");
+                codeBuilder
+                        .ldc("Socket.connect")
+                        .invokestatic(accessControl, "checkPermission", methodTypeDesc)
+                        .with(codeElement);
                 modified.set(true);
             } else {
                 codeBuilder.with(codeElement);

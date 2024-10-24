@@ -24,6 +24,8 @@ import java.lang.constant.ClassDesc;
 import java.lang.constant.MethodTypeDesc;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @SuppressWarnings("preview")
 public class SystemExecTransformer implements MatildaCodeTransformer {
@@ -42,18 +44,13 @@ public class SystemExecTransformer implements MatildaCodeTransformer {
         Predicate<CodeElement> predicate = getTransformPredicate();
         return (codeBuilder, codeElement) -> {
             if (predicate.test(codeElement)) {
-                /*
-                 * Rewrite every invokestatic of System::exit(int) to an athrow of RuntimeException.
-                 */
-                var runtimeException = ClassDesc.of("java.lang.RuntimeException");
-                codeBuilder.new_(runtimeException)
-                        .dup()
-                        .ldc("ProceesBuilder.start(...) not allowed")
-                        .invokespecial(runtimeException,
-                                "<init>",
-                                MethodTypeDesc.ofDescriptor("(Ljava/lang/String;)V"),
-                                false)
-                        .athrow();
+                Logger.getLogger(SystemExecTransformer.class.getName()).log(Level.WARNING, "transform ProcessBuilder");
+                var accessControl = ClassDesc.of("org.khaleesicodes.bootstrap.MatildaAccessControl");
+                var methodTypeDesc = MethodTypeDesc.ofDescriptor("(Ljava/lang/String;)V");
+                codeBuilder
+                        .ldc("ProcessBuilder.start")
+                        .invokestatic(accessControl, "checkPermission", methodTypeDesc)
+                        .with(codeElement);
                 modified.set(true);
             } else {
                 codeBuilder.with(codeElement);

@@ -18,8 +18,6 @@ package org.khaleesicodes;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
-import java.io.InputStream;
 import java.net.Socket;
 import java.net.URL;
 import java.net.URLConnection;
@@ -28,10 +26,9 @@ import java.net.URLConnection;
 public class AgentMatildaTest {
     @Test
     public void testSystemExitTransformer()  {
-
-
         RuntimeException uOE = Assertions.assertThrows(RuntimeException.class, () -> {
             System.exit(-1);
+            Assertions.fail("should not have been able to exit the process");
         });
         Assertions.assertEquals("System.exit not allowed", uOE.getMessage());
 
@@ -41,7 +38,9 @@ public class AgentMatildaTest {
     public void testSystemExecTransformer()  {
 
         RuntimeException uOE = Assertions.assertThrows(RuntimeException.class, () -> {
-            Runtime.getRuntime().exec("foo");
+            Runtime.getRuntime().exec("echo");
+            Assertions.fail("should not have been able to run a process");
+
         });
         Assertions.assertEquals("ProceesBuilder.start(...) not allowed", uOE.getMessage());
     }
@@ -50,6 +49,7 @@ public class AgentMatildaTest {
     public void openSocketTest() {
         RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> {
             Socket socket = new Socket("localhost", 9999);
+            Assertions.fail("should not have been able to open a connection");
         });
         Assertions.assertEquals("Socket not allowed", exception.getMessage());
 
@@ -60,9 +60,7 @@ public class AgentMatildaTest {
         String url = "https://google.com";
         RuntimeException exception_url = Assertions.assertThrows(RuntimeException.class, () -> {
             URLConnection connection = new URL(url).openConnection();
-            connection.setRequestProperty("Accept-Charset", "text/html");
-            InputStream response = connection.getInputStream();
-
+            Assertions.fail("should not have been able to open a connection");
         });
         Assertions.assertEquals("Socket not allowed", exception_url.getMessage());
 

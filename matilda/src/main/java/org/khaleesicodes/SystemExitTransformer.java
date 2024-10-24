@@ -24,9 +24,11 @@ import java.lang.constant.ClassDesc;
 import java.lang.constant.MethodTypeDesc;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @SuppressWarnings("preview")
-public class SystemExitTransformer implements MatildaCodeTransformer  {
+public class SystemExitTransformer implements MatildaCodeTransformer {
     @Override
     public Predicate<CodeElement> getTransformPredicate() {
         return codeElement -> codeElement instanceof InvokeInstruction i
@@ -34,30 +36,26 @@ public class SystemExitTransformer implements MatildaCodeTransformer  {
                 && "java/lang/System".equals(i.owner().asInternalName())
                 && "exit".equals(i.name().stringValue())
                 && "(I)V".equals(i.type().stringValue());
-        }
+    }
 
     @Override
     public CodeTransform getTransform(AtomicBoolean modified) {
         Predicate<CodeElement> predicate = getTransformPredicate();
         return (codeBuilder, codeElement) -> {
             if (predicate.test(codeElement)) {
-                /*
-                 * Rewrite every invokestatic of System::exit(int) to an athrow of RuntimeException.
-                 */
-                var runtimeException = ClassDesc.of("java.lang.RuntimeException");
-                codeBuilder.new_(runtimeException)
-                        .dup()
-                        .ldc("System.exit not allowed")
-                        .invokespecial(runtimeException,
-                                "<init>",
-                                MethodTypeDesc.ofDescriptor("(Ljava/lang/String;)V"),
-                                false)
-                        .athrow();
-                modified.set(true);
-            } else {
-                codeBuilder.with(codeElement);
-            }
-        };
+                    Logger.getLogger(SystemExitTransformer.class.getName()).log(Level.WARNING, "transform System.exit");
+                    var accessControl = ClassDesc.of("org.khaleesicodes.bootstrap.MatildaAccessControl");
+                    var methodTypeDesc = MethodTypeDesc.ofDescriptor("(Ljava/lang/String;)V");
+                    codeBuilder
+                            .ldc("System.exit")
+                            .invokestatic(accessControl, "checkPermission", methodTypeDesc)
+                            .with(codeElement);
+
+                    modified.set(true);
+                } else {
+                    codeBuilder.with(codeElement);
+                }
+            };
+        }
     }
-}
 

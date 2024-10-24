@@ -33,7 +33,7 @@ tasks.withType(JavaExec).configureEach {
 
 task bootstrapJar(type: Jar) {
     from(sourceSets.main.output) {
-        include "org/khaleesicodes/utils/**"
+        include "org/khaleesicodes/bootstrap/**"
     }
     archiveBaseName = 'matilda-bootstrap'
 }
@@ -41,7 +41,7 @@ task bootstrapJar(type: Jar) {
 
 task agentJar(type: Jar) {
     from(sourceSets.main.output) {
-        exclude "org/khaleesicodes/utils/**"
+        exclude "org/khaleesicodes/bootstrap/**"
     }
     manifest {
         attributes(
