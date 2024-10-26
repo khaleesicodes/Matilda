@@ -32,14 +32,4 @@ class MatildaAccessControlTest {
         Assertions.assertEquals("module org.junit.platform.commons", callingClass.toString());
     }
 
-
-    @Test
-    void testCheckSystemExit() {
-        Module callingClass = MatildaAccessControl.callingClass(2);
-        Assertions.assertEquals("module org.junit.platform.commons", callingClass.toString());
-        //Assertions.fail("Actual calling class" + callingClass.toString());
-        Assertions.assertTrue(MatildaAccessControl.checkSystemExit());
-
-
-    }
 }

@@ -36,8 +36,8 @@ public class MatildaAccessControl {
     // Maybe not needed as solve in one line see lin 37
     public static Boolean checkSystemExit() {
         // 2 Frames need to be skipped in order to check if the caller is junit which is allowed to exit maybe
-        var callingClass = callingClass(2);
-        System.out.println("Class that initially called the method" + callingClass.toString());
+        var callingClass = callingClass(3);
+        System.err.println("Class that initially called the method" + callingClass.toString());
         return callingClass.toString().equals("module gradle.worker");
     }
 
