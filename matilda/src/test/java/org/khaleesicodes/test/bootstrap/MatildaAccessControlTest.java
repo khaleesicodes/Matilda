@@ -6,17 +6,11 @@ import org.khaleesicodes.bootstrap.MatildaAccessControl;
 
 
 class MatildaAccessControlTest {
-
-    public static void main(String[] args) {
-        Module callingClass = MatildaAccessControl.callingClass(0);
-
-    }
     // Don't forget to build first in order to have the updated jars
     @Test
     void testcallingClassFrame0(){
         Module callingClass = MatildaAccessControl.callingClass(0);
         Assertions.assertEquals("module matilda.test", callingClass.toString());
-        //Assertions.fail(" Frame0: " + callingClass);
     }
 
     @Test
