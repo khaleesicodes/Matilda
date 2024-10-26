@@ -57,4 +57,7 @@ test {
     jvmArgs += ["--enable-preview","-javaagent:${project.rootDir}/build/libs/matilda-agent-1.0-SNAPSHOT.jar",
                 "-Dmatilda.bootstrap.jar=${project.rootDir}/build/libs/matilda-bootstrap-1.0-SNAPSHOT.jar"]
     useJUnitPlatform()
+    testLogging {
+        exceptionFormat = 'full'
+    }
 }

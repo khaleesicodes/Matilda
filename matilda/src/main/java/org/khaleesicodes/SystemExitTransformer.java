@@ -24,8 +24,7 @@ import java.lang.constant.ClassDesc;
 import java.lang.constant.MethodTypeDesc;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 
 @SuppressWarnings("preview")
 public class SystemExitTransformer implements MatildaCodeTransformer {
@@ -43,7 +42,6 @@ public class SystemExitTransformer implements MatildaCodeTransformer {
         Predicate<CodeElement> predicate = getTransformPredicate();
         return (codeBuilder, codeElement) -> {
             if (predicate.test(codeElement)) {
-                    Logger.getLogger(SystemExitTransformer.class.getName()).log(Level.WARNING, "transform System.exit");
                     var accessControl = ClassDesc.of("org.khaleesicodes.bootstrap.MatildaAccessControl");
                     var methodTypeDesc = MethodTypeDesc.ofDescriptor("(Ljava/lang/String;)V");
                     codeBuilder
