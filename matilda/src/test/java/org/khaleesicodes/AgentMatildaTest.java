@@ -18,6 +18,8 @@ package org.khaleesicodes;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.io.InputStream;
 import java.net.Socket;
 import java.net.URL;
 import java.net.URLConnection;
@@ -60,6 +62,8 @@ public class AgentMatildaTest {
         String url = "https://google.com";
         RuntimeException exception_url = Assertions.assertThrows(RuntimeException.class, () -> {
             URLConnection connection = new URL(url).openConnection();
+            connection.setRequestProperty("Accept-Charset", "text/html");
+            InputStream response = connection.getInputStream();
             Assertions.fail("should not have been able to open a connection");
         });
         Assertions.assertEquals("Socket not allowed", exception_url.getMessage());
