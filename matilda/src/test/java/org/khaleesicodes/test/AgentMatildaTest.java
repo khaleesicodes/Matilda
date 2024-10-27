@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -24,6 +24,9 @@ import java.net.Socket;
 import java.net.URL;
 import java.net.URLConnection;
 
+// TODO javadoc
+// TODO bigger task -- add test methods for the Transformers --  need stubs and some mocks but doable
+// TODO need the ability to test if actually allows some code to pass checks
 
 public class AgentMatildaTest {
     @Test
@@ -38,7 +41,6 @@ public class AgentMatildaTest {
 
     @Test
     public void testSystemExecTransformer()  {
-
         RuntimeException uOE = Assertions.assertThrows(RuntimeException.class, () -> {
             Runtime.getRuntime().exec("echo");
             Assertions.fail("should not have been able to run a process");

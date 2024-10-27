@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -16,8 +16,6 @@
  */
 package org.khaleesicodes;
 
-import org.khaleesicodes.bootstrap.MatildaAccessControl;
-
 import java.lang.classfile.CodeElement;
 import java.lang.classfile.CodeTransform;
 import java.lang.classfile.Opcode;
@@ -27,6 +25,7 @@ import java.lang.constant.MethodTypeDesc;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 
+// TODO add javadocs
 @SuppressWarnings("preview")
 public class NetworkSocketTransformer implements MatildaCodeTransformer{
 
@@ -37,6 +36,7 @@ public class NetworkSocketTransformer implements MatildaCodeTransformer{
      */
     @Override
     public Predicate<CodeElement> getTransformPredicate() {
+        // TODO explain with a comment how this actually works show an example of the method that is actually matched here
         return codeElement ->
                 codeElement instanceof InvokeInstruction i
                         && i.opcode() == Opcode.INVOKEVIRTUAL
@@ -60,7 +60,7 @@ public class NetworkSocketTransformer implements MatildaCodeTransformer{
                 var accessControl = ClassDesc.of("org.khaleesicodes.bootstrap.MatildaAccessControl");
                 var methodTypeDesc = MethodTypeDesc.ofDescriptor("(Ljava/lang/String;)V");
                 codeBuilder
-                        .ldc("Socket.connect")
+                        .ldc("Socket.connect") // TODO document why this can't be a constant on MatildaAccessControl bc.of classloading issues
                         .invokestatic(accessControl, "checkPermission", methodTypeDesc)
                         .with(codeElement);
                 modified.set(true);

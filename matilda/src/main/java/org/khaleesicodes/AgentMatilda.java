@@ -20,6 +20,9 @@ import module java.base;
 import module java.instrument;
 
 
+// TODO add javadocs
+// TODO make class final
+// TODO leave a comment why a preview features is used and not ASM or something similar -- just good to have some reasoning
 public class AgentMatilda {
 
     /**
@@ -37,7 +40,9 @@ public class AgentMatilda {
         }
 
         JarFile bootstrapJar = new JarFile(bootStrapJarPath);
-
+        // TODO check if 3 vars are needed
+        // TODO maybe it can be move all in one?
+        //
 
         var sysExitTransformer = new ClassFileTransformer() {
             @Override
@@ -66,8 +71,7 @@ public class AgentMatilda {
                     return null;
                 } else {
                     return processClasses(classBytes, new SystemExecTransformer());
-
-                    }
+                }
               }
         };
         inst.addTransformer(sysExecTransformer, true);
@@ -83,6 +87,7 @@ public class AgentMatilda {
 
             }
         };
+        // TODO explain why we need to put stuff on the bootclasspath
         inst.addTransformer(socketTransformer, true);
         inst.retransformClasses(Socket.class, System.class, ProcessBuilder.class);
         inst.appendToBootstrapClassLoaderSearch(bootstrapJar);

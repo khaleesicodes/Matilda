@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -25,11 +25,13 @@ import java.lang.constant.MethodTypeDesc;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 
-
+// TODO javadoc
 @SuppressWarnings("preview")
 public class SystemExitTransformer implements MatildaCodeTransformer {
     @Override
     public Predicate<CodeElement> getTransformPredicate() {
+        // TODO explain with a comment how this actually works show an example of the method that actually try to match here
+
         return codeElement -> codeElement instanceof InvokeInstruction i
                 && i.opcode() == Opcode.INVOKESTATIC
                 && "java/lang/System".equals(i.owner().asInternalName())
@@ -45,7 +47,7 @@ public class SystemExitTransformer implements MatildaCodeTransformer {
                     var accessControl = ClassDesc.of("org.khaleesicodes.bootstrap.MatildaAccessControl");
                     var methodTypeDesc = MethodTypeDesc.ofDescriptor("(Ljava/lang/String;)V");
                     codeBuilder
-                            .ldc("System.exit")
+                            .ldc("System.exit") // TODO document why this can't be a constant on MatildaAccessControl bc.of classloading issues
                             .invokestatic(accessControl, "checkPermission", methodTypeDesc)
                             .with(codeElement);
 

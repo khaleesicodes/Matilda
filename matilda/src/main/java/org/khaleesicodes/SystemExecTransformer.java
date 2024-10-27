@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -24,11 +24,13 @@ import java.lang.constant.ClassDesc;
 import java.lang.constant.MethodTypeDesc;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
-
+//TODO javadocs
+// TODO explain that this is actually Runtime.getRuntime().exec(...)
 @SuppressWarnings("preview")
 public class SystemExecTransformer implements MatildaCodeTransformer {
-    // private Process start(ProcessBuilder.Redirect[] redirects) throws IOException {
+
     public Predicate<CodeElement> getTransformPredicate() {
+        // TODO explain with a comment how this actually works show an example of the method that is actually  matched here
         return codeElement ->
                 codeElement instanceof InvokeInstruction i
                         && i.opcode() == Opcode.INVOKEVIRTUAL
@@ -37,6 +39,7 @@ public class SystemExecTransformer implements MatildaCodeTransformer {
                         && "([Ljava/lang/ProcessBuilder$Redirect;)Ljava/lang/Process;".equals(i.type().stringValue());
     }
 
+    // TODO document why this can't be a constant on MatildaAccessControl bc.of classloading issues
     @Override
     public CodeTransform getTransform(AtomicBoolean modified) {
         Predicate<CodeElement> predicate = getTransformPredicate();
@@ -45,7 +48,7 @@ public class SystemExecTransformer implements MatildaCodeTransformer {
                 var accessControl = ClassDesc.of("org.khaleesicodes.bootstrap.MatildaAccessControl");
                 var methodTypeDesc = MethodTypeDesc.ofDescriptor("(Ljava/lang/String;)V");
                 codeBuilder
-                        .ldc("ProcessBuilder.start")
+                        .ldc("ProcessBuilder.start") // TODO document why this can't be a constant on MatildaAccessControl bc.of classloading issues
                         .invokestatic(accessControl, "checkPermission", methodTypeDesc)
                         .with(codeElement);
                 modified.set(true);
