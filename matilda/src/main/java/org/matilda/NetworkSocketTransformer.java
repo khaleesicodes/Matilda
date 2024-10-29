@@ -26,6 +26,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 
 // TODO add javadocs
+
+/**
+ *
+ */
 @SuppressWarnings("preview")
 public class NetworkSocketTransformer implements MatildaCodeTransformer{
 
@@ -46,7 +50,7 @@ public class NetworkSocketTransformer implements MatildaCodeTransformer{
     }
 
     /**
-     * Transforms connect method  so that it throws a runtime exception
+     * Transforms connect method so that it throws a runtime exception
      * @param modified
      * @return
      */

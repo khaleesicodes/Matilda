@@ -1,7 +1,27 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Project defaults to use Matilda
+ */
+
 plugins {
     id 'java'
 }
-// TODO" fix group name
 group = 'org.matilda'
 version = '1.0-SNAPSHOT'
 
@@ -14,12 +34,13 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter'
 }
 
+// Configuration of Java compiler in order to run JDK with preview features
 tasks.withType(JavaCompile).configureEach {
     options.compilerArgs += "--enable-preview"
 }
 
-
-
+//TODO explain why two jars are needed
+// Configuration to run Test with the right parameters, a separate jar is needed to properly run the Java Agent
 tasks.withType(Test).configureEach {
     jvmArgs += ["--enable-preview","-javaagent:${project.rootDir}/build/libs/matilda-agent-1.0-SNAPSHOT.jar",
                 "-Dmatilda.bootstrap.jar=${project.rootDir}/build/libs/matilda-bootstrap-1.0-SNAPSHOT.jar"]
@@ -31,6 +52,7 @@ tasks.withType(JavaExec).configureEach {
 
 }
 
+// Build config for Access Control Class
 task bootstrapJar(type: Jar) {
     from(sourceSets.main.output) {
         include "org/matilda/bootstrap/**"
@@ -38,7 +60,7 @@ task bootstrapJar(type: Jar) {
     archiveBaseName = 'matilda-bootstrap'
 }
 
-
+// Build config for the Agent jar, needs to explicitly run with premain methods and allow class configuration
 task agentJar(type: Jar) {
     from(sourceSets.main.output) {
         exclude "org/matilda/bootstrap/**"
@@ -51,11 +73,13 @@ task agentJar(type: Jar) {
     }
     archiveBaseName = 'matilda-agent'
 }
-
 jar.dependsOn(agentJar, bootstrapJar)
+
+// Configuration for unit test, all JVMs need to be set properly in order for all test to work
 test {
     jvmArgs += ["--enable-preview","-javaagent:${project.rootDir}/build/libs/matilda-agent-1.0-SNAPSHOT.jar",
-                "-Dmatilda.bootstrap.jar=${project.rootDir}/build/libs/matilda-bootstrap-1.0-SNAPSHOT.jar"]
+                "-Dmatilda.bootstrap.jar=${project.rootDir}/build/libs/matilda-bootstrap-1.0-SNAPSHOT.jar",
+                "-Dmatilda.system.exit.allow=module gradle.worker"]
     useJUnitPlatform()
     testLogging {
         exceptionFormat = 'full'

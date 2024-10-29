@@ -26,29 +26,24 @@ import java.util.Properties;
 class MatildaAccessControlTest {
     // Don't forget to build first in order to have the updated jars
     @Test
-    void testcallingClassFrame0(){
+    void testCallingClassFrame0(){
         Module callingClass = MatildaAccessControl.getInstance().callingClass(0);
         Assertions.assertEquals("module matilda.core", callingClass.toString());
     }
 
     @Test
-    void testcallingClassFrame1(){
+    void testCallingClassFrame1(){
         Module callingClass = MatildaAccessControl.getInstance().callingClass(1);
         Assertions.assertEquals("module matilda.test", callingClass.toString());
     }
 
     @Test
-    void testcallingClassFrame2(){
+    void testCallingClassFrame2(){
         Module callingClass = MatildaAccessControl.getInstance().callingClass(2);
         Assertions.assertEquals("module org.junit.platform.commons", callingClass.toString());
     }
 
-    @Test
-    void testConfiguration(){
-        Properties properties = new Properties();
-        properties.setProperty("matilda.system.exit.allow", "module gradle.worker");
-        MatildaAccessControl accessControl = new MatildaAccessControl(properties);
-    }
+
 
 
 }

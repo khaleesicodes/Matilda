@@ -26,8 +26,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 
 // TODO javadoc
+
+/**
+ *
+ */
 @SuppressWarnings("preview")
 public class SystemExitTransformer implements MatildaCodeTransformer {
+    /**
+     *
+     * @return
+     */
     @Override
     public Predicate<CodeElement> getTransformPredicate() {
         // TODO explain with a comment how this actually works show an example of the method that actually try to match here
@@ -39,6 +47,11 @@ public class SystemExitTransformer implements MatildaCodeTransformer {
                 && "(I)V".equals(i.type().stringValue());
     }
 
+    /**
+     *
+     * @param modified
+     * @return
+     */
     @Override
     public CodeTransform getTransform(AtomicBoolean modified) {
         Predicate<CodeElement> predicate = getTransformPredicate();

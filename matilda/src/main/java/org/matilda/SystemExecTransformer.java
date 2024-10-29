@@ -26,8 +26,17 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 //TODO javadocs
 // TODO explain that this is actually Runtime.getRuntime().exec(...)
+
+/**
+ *
+ *
+ */
 @SuppressWarnings("preview")
 public class SystemExecTransformer implements MatildaCodeTransformer {
+    /**
+     *
+     * @return Predicate -
+     */
 
     public Predicate<CodeElement> getTransformPredicate() {
         // TODO explain with a comment how this actually works show an example of the method that is actually  matched here
@@ -40,6 +49,12 @@ public class SystemExecTransformer implements MatildaCodeTransformer {
     }
 
     // TODO document why this can't be a constant on MatildaAccessControl bc.of classloading issues
+
+    /**
+     *
+     * @param modified
+     * @return
+     */
     @Override
     public CodeTransform getTransform(AtomicBoolean modified) {
         Predicate<CodeElement> predicate = getTransformPredicate();

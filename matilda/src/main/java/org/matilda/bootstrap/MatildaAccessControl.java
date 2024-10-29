@@ -27,6 +27,11 @@ import java.util.logging.Logger;
 
 // TODO add javadocs
 // TODO for testing need to be pluggable in some way maybe with subclass and non static methods MatildaTestAccessControl
+
+/**
+ * The Matilda AccessController allows granting permissions per module via System.properties()
+ *
+ */
 // Made class final so it can't be manipulated
 public final class MatildaAccessControl {
     // TODO: replace the Allowed modules with a simple check for "java.base"
@@ -40,6 +45,10 @@ public final class MatildaAccessControl {
         return INSTANCE;
     }
 
+    /**
+     * Costumized properties can be passed via the command line
+     * @param properties - Properties should be passed via System.properties
+     */
     public MatildaAccessControl(Properties properties) {
         String systemExistAllow = properties.getProperty("matilda.system.exit.allow", "");
         String systemExecAllow = properties.getProperty("matilda.system.exec.allow", "");
@@ -51,6 +60,13 @@ public final class MatildaAccessControl {
     public static void checkPermission(String method){
         INSTANCE.checkPermissionInternal(method);
     }
+
+    /**
+     * Method checks if called method has the permissions to be executed
+     * @param method - method that is currently called
+     * @throws RuntimeException - if method/ callers don't have the permissions to be executed
+     *
+     */
     void checkPermissionInternal(String method) {
         switch (method) {
             case "System.exit":
@@ -67,26 +83,53 @@ public final class MatildaAccessControl {
         }
     }
 
-    // TODO add the possibiilty to configure other modules for certain methods
+    /**
+     *
+     * Checks if caller has permission to call System.exit()
+     * @return boolean - returns true if caller has the right permissions
+     *
+     */
     boolean checkSystemExit() {
         var callingClass = callingClassModule();
         Logger logger = Logger.getLogger(MatildaAccessControl.class.getName());
         logger.log(Level.WARNING,"Class that initially called the method" + callingClass.toString() );
-        return callingClass.toString().equals("module gradle.worker");
-        //this.systemExitAllowPermissions.contains(callingClass.toString());
-
+        return this.systemExitAllowPermissions.contains(callingClass.toString());
     }
 
+    /**
+     *
+     * Checks if caller has permission to call System.exec()
+     * @return boolean - returns true if caller has the right permissions
+     *
+     */
     boolean checkSystemExec() {
         var callingClass = callingClassModule();
+        Logger logger = Logger.getLogger(MatildaAccessControl.class.getName());
+        logger.log(Level.WARNING,"Class that initially called the method" + callingClass.toString() );
         return this.systemExecAllowPermissions.contains(callingClass.toString());
     }
 
+
+    /**
+     *
+     * Checks if caller has permission to call Socket.connect()
+     * @return boolean - returns true if caller has the right permissions
+     *
+     */
     boolean checkSocketPermission(){
         var callingClass = callingClassModule();
+        Logger logger = Logger.getLogger(MatildaAccessControl.class.getName());
+        logger.log(Level.WARNING,"Class that initially called the method" + callingClass.toString() );
         return this.networkConnectAllowPermissions.contains(callingClass.toString());
     }
 
+    /**
+     *
+     *
+     * @return Module - Returns module that initially called method
+     *
+     */
+    //TODO: do we need this?
     private Module callingClassModule() {
         // checkSystemexit
         // checkPermission
@@ -95,8 +138,8 @@ public final class MatildaAccessControl {
         // method that we are looking for
         // calling class
         int framesToSkip = 1  // getCallingClass (this method)
-                + 1  // Instantiation
                 + 1  // the checkXxx method
+                + 1  // Instantiation
                 + 1  // the runtime config method
                 + 1  // the instrumented method
                 ;
@@ -104,8 +147,13 @@ public final class MatildaAccessControl {
     }
 
 
+    /**
+     *
+     * Iterates over the current Stack and skips specified number of elements
+     * @param framesToSkip - number of frames, element on stack that should be skipped
+     * @return Module - calling Modul
+     */
     //TODO make private, is just public for testing purposes
-
     public Module callingClass(int framesToSkip) {
         if(framesToSkip < 0) throw new IllegalArgumentException("framesToSkip must be >=0");
         Optional<Module> module = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE)
