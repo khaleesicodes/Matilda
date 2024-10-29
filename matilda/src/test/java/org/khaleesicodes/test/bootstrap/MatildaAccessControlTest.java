@@ -25,20 +25,21 @@ class MatildaAccessControlTest {
     // Don't forget to build first in order to have the updated jars
     @Test
     void testcallingClassFrame0(){
-        Module callingClass = MatildaAccessControl.callingClass(0);
+        Module callingClass = MatildaAccessControl.getInstance().callingClass(0);
         Assertions.assertEquals("module matilda.core", callingClass.toString());
     }
 
     @Test
     void testcallingClassFrame1(){
-        Module callingClass = MatildaAccessControl.callingClass(1);
+        Module callingClass = MatildaAccessControl.getInstance().callingClass(1);
         Assertions.assertEquals("module matilda.test", callingClass.toString());
     }
 
     @Test
     void testcallingClassFrame2(){
-        Module callingClass = MatildaAccessControl.callingClass(2);
+        Module callingClass = MatildaAccessControl.getInstance().callingClass(2);
         Assertions.assertEquals("module org.junit.platform.commons", callingClass.toString());
     }
+
 
 }
