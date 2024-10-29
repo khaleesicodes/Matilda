@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.khaleesicodes.bootstrap;
+package org.matilda.bootstrap;
 
 import java.util.Optional;
 import java.util.Properties;
@@ -31,11 +31,10 @@ import java.util.logging.Logger;
 public final class MatildaAccessControl {
     // TODO: replace the Allowed modules with a simple check for "java.base"
     private static final Set<Module> ALLOWED_MODULES = Set.of(System.class.getModule());
-    // TODO add the possibiilty to configure other modules for certain methods
-    //  matilda.modulename=socket.connect
-    //  matilda.gradle.worker=system.exit
-    //  System.getProperties() for example
     private static final MatildaAccessControl INSTANCE = new MatildaAccessControl(System.getProperties());
+    private final Set<String> systemExitAllowPermissions;
+    private final Set<String> systemExecAllowPermissions;
+    private final Set<String> networkConnectAllowPermissions;
 
     public static MatildaAccessControl getInstance() {
         return INSTANCE;
@@ -43,10 +42,11 @@ public final class MatildaAccessControl {
 
     public MatildaAccessControl(Properties properties) {
         String systemExistAllow = properties.getProperty("matilda.system.exit.allow", "");
-        properties.get("matilda.system.exec.allow");
-        properties.get("matilda.network.connect.allow");
-
-        Set<String> systemExitAllowModules = Set.of(systemExistAllow.split(","));
+        String systemExecAllow = properties.getProperty("matilda.system.exec.allow", "");
+        String networkConnectAllow = properties.getProperty("matilda.network.connect.allow", "");
+        this.systemExitAllowPermissions = Set.of(systemExistAllow.split(","));
+        this.systemExecAllowPermissions = Set.of(systemExecAllow.split(","));
+        this.networkConnectAllowPermissions = Set.of(networkConnectAllow.split(","));
     }
     public static void checkPermission(String method){
         INSTANCE.checkPermissionInternal(method);
@@ -54,46 +54,48 @@ public final class MatildaAccessControl {
     void checkPermissionInternal(String method) {
         switch (method) {
             case "System.exit":
-                if (checkSystemExit()){
-                    return;
-                }
-                else throw new RuntimeException("System.exit not allowed");
+                if (!checkSystemExit()) throw new RuntimeException("System.exit not allowed");
+                else return;
             case "ProcessBuilder.start":
-                throw new RuntimeException("ProceesBuilder.start(...) not allowed");
+                if(!checkSystemExec())throw new RuntimeException("ProceesBuilder.start(...) not allowed");
+                else return;
             case "Socket.connect":
-                throw new RuntimeException("Socket not allowed");
+                if(!checkSocketPermission())throw new RuntimeException("Socket not allowed");
+                else return;
             default:
                 throw new IllegalArgumentException("Unknown method: " + method);
         }
     }
 
+    // TODO add the possibiilty to configure other modules for certain methods
     boolean checkSystemExit() {
-        // 2 Frames need to be skipped in order to check if the caller is junit which is allowed to exit maybe
         var callingClass = callingClassModule();
         Logger logger = Logger.getLogger(MatildaAccessControl.class.getName());
         logger.log(Level.WARNING,"Class that initially called the method" + callingClass.toString() );
         return callingClass.toString().equals("module gradle.worker");
+        //this.systemExitAllowPermissions.contains(callingClass.toString());
+
     }
 
-    boolean checkProcessBuilderPermission() {
+    boolean checkSystemExec() {
         var callingClass = callingClassModule();
-
-        Properties properties = System.getProperties();
-        return false;
+        return this.systemExecAllowPermissions.contains(callingClass.toString());
     }
 
     boolean checkSocketPermission(){
-        return false;
+        var callingClass = callingClassModule();
+        return this.networkConnectAllowPermissions.contains(callingClass.toString());
     }
 
     private Module callingClassModule() {
         // checkSystemexit
         // checkPermission
+        // Instantiation
         // getTransformer
         // method that we are looking for
         // calling class
         int framesToSkip = 1  // getCallingClass (this method)
-                + 1
+                + 1  // Instantiation
                 + 1  // the checkXxx method
                 + 1  // the runtime config method
                 + 1  // the instrumented method
@@ -101,7 +103,7 @@ public final class MatildaAccessControl {
         return callingClass(framesToSkip);
     }
 
-    // Gets requesting class
+
     //TODO make private, is just public for testing purposes
 
     public Module callingClass(int framesToSkip) {

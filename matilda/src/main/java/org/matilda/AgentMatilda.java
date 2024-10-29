@@ -15,23 +15,30 @@
  * limitations under the License.
  */
 
-package org.khaleesicodes;
+package org.matilda;
 import module java.base;
 import module java.instrument;
 
 
 // TODO add javadocs
-// TODO make class final
-// TODO leave a comment why a preview features is used and not ASM or something similar -- just good to have some reasoning
-public class AgentMatilda {
-
+/**
+ *
+ * The Matilda Agent allows the attachment to the JVM, manipulating the bytecode of all Classes
+ * that are being loaded according to the configured permissions.
+ * The Agent heavily uses the ClassFile API for bytecode manipulation. The API is a preview Feature in JDK 23. It
+ * delivers bytecode manipulation capabilities similar to ASM, but shipped in the JDK. Using the API makes Matilda
+ * independent of any external dependencies.
+ *
+ * @author Elina Eickstaedt
+ *
+ */
+public final class AgentMatilda {
     /**
-     *
-     * Agent class that initiates all transformers
      *
      * @param agentArgs
      * @param inst
      * @throws UnmodifiableClassException
+     * @throws IOException
      */
     public static void premain(String agentArgs, Instrumentation inst) throws UnmodifiableClassException, IOException {
         var bootStrapJarPath = System.getProperty("matilda.bootstrap.jar");
@@ -42,8 +49,6 @@ public class AgentMatilda {
         JarFile bootstrapJar = new JarFile(bootStrapJarPath);
         // TODO check if 3 vars are needed
         // TODO maybe it can be move all in one?
-        //
-
         var sysExitTransformer = new ClassFileTransformer() {
             @Override
             public byte[] transform(ClassLoader      loader,
@@ -82,7 +87,6 @@ public class AgentMatilda {
                                     Class<?>         classBeingRedefined,
                                     ProtectionDomain protectionDomain,
                                     byte[]           classBytes) {
-
                     return processClasses(classBytes, new NetworkSocketTransformer());
 
             }

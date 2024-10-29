@@ -2,7 +2,7 @@ plugins {
     id 'java'
 }
 // TODO" fix group name
-group = 'org.khaleesicodes'
+group = 'org.matilda'
 version = '1.0-SNAPSHOT'
 
 repositories {
@@ -33,7 +33,7 @@ tasks.withType(JavaExec).configureEach {
 
 task bootstrapJar(type: Jar) {
     from(sourceSets.main.output) {
-        include "org/khaleesicodes/bootstrap/**"
+        include "org/matilda/bootstrap/**"
     }
     archiveBaseName = 'matilda-bootstrap'
 }
@@ -41,11 +41,11 @@ task bootstrapJar(type: Jar) {
 
 task agentJar(type: Jar) {
     from(sourceSets.main.output) {
-        exclude "org/khaleesicodes/bootstrap/**"
+        exclude "org/matilda/bootstrap/**"
     }
     manifest {
         attributes(
-                "Premain-Class": "org.khaleesicodes.AgentMatilda",
+                "Premain-Class": "org.matilda.AgentMatilda",
                 "Can-Retransform-Classes": true
         )
     }

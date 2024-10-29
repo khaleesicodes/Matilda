@@ -14,11 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.khaleesicodes.test.bootstrap;
+package org.matilda.test.bootstrap;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.khaleesicodes.bootstrap.MatildaAccessControl;
+import org.matilda.bootstrap.MatildaAccessControl;
+
+import java.util.Properties;
 
 //TODO: make test mehtods camelCase
 class MatildaAccessControlTest {
@@ -39,6 +41,13 @@ class MatildaAccessControlTest {
     void testcallingClassFrame2(){
         Module callingClass = MatildaAccessControl.getInstance().callingClass(2);
         Assertions.assertEquals("module org.junit.platform.commons", callingClass.toString());
+    }
+
+    @Test
+    void testConfiguration(){
+        Properties properties = new Properties();
+        properties.setProperty("matilda.system.exit.allow", "module gradle.worker");
+        MatildaAccessControl accessControl = new MatildaAccessControl(properties);
     }
 
 

@@ -17,11 +17,11 @@
 module matilda.core {
     // TODO javadoc and license heaeder
     // TODO we need to settle on a consistent naming here
-    // either we use org.khaleesicodes or org.matilda then we can also name it org.matilda.core and org.matilda.test
+    // either we use org.matilda or org.matilda then we can also name it org.matilda.core and org.matilda.test
     requires java.logging;
     requires java.base;
     requires java.instrument;
-    exports org.khaleesicodes.bootstrap;
-    opens org.khaleesicodes to java.instrument;
-    opens org.khaleesicodes.bootstrap to java.instrument;
+    exports org.matilda.bootstrap;
+    opens org.matilda to java.instrument;
+    opens org.matilda.bootstrap to java.instrument;
 }

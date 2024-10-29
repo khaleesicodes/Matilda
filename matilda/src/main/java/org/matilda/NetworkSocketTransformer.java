@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.khaleesicodes;
+package org.matilda;
 
 import java.lang.classfile.CodeElement;
 import java.lang.classfile.CodeTransform;
@@ -57,7 +57,7 @@ public class NetworkSocketTransformer implements MatildaCodeTransformer{
         Predicate<CodeElement> predicate = getTransformPredicate();
         return (codeBuilder, codeElement) -> {
             if (predicate.test(codeElement)) {
-                var accessControl = ClassDesc.of("org.khaleesicodes.bootstrap.MatildaAccessControl");
+                var accessControl = ClassDesc.of("org.matilda.bootstrap.MatildaAccessControl");
                 var methodTypeDesc = MethodTypeDesc.ofDescriptor("(Ljava/lang/String;)V");
                 codeBuilder
                         .ldc("Socket.connect") // TODO document why this can't be a constant on MatildaAccessControl bc.of classloading issues
