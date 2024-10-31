@@ -62,7 +62,7 @@ public class AgentMatildaTest {
 
     @Test
     public void openURLTest() {
-        String url = "https://google.com";
+        String url = "http://localhost:9999";
         RuntimeException exception_url = Assertions.assertThrows(RuntimeException.class, () -> {
             URLConnection connection = new URL(url).openConnection();
             connection.setRequestProperty("Accept-Charset", "text/html");

@@ -20,35 +20,35 @@ import module java.base;
 import module java.instrument;
 
 
-// TODO add javadocs
+// TODO add javadocs {@link org.matilda.bootstrap.MatildaAccessControl}
+// TODO explain how to hook this into the jvm and also explain that it adds our access controller on the boot classpath
+// otherwise the classes like System won't find the accessControl since they are all loaded by the bootclassloader
 /**
  *
- * The Matilda Agent allows the attachment to the JVM, manipulating the bytecode of all Classes
+ * The matilda agent allows the attachment to the JVM, manipulating the bytecode of all classes
  * that are being loaded according to the configured permissions.
- * The Agent heavily uses the ClassFile API for bytecode manipulation. The API is a preview Feature in JDK 23. It
+ * The agent heavily uses the ClassFile API for bytecode manipulation. The API is a preview Feature in JDK 23. It
  * delivers bytecode manipulation capabilities similar to ASM, but shipped in the JDK. Using the API makes Matilda
  * independent of any external dependencies.
  *
  * @author Elina Eickstaedt
+ * @see org.matilda.bootstrap.MatildaAccessControl
  *
  */
 public final class AgentMatilda {
+
     /**
-     *
-     * @param agentArgs
-     * @param inst
-     * @throws UnmodifiableClassException
-     * @throws IOException
+     * // TODO explain how this method is hooked in the jvm --agentblafoo
+     * @throws IOException - in the case of an exception during class loading
+     * @throws UnmodifiableClassException - if one of the transformed classes can't be modified
      */
-    public static void premain(String agentArgs, Instrumentation inst) throws UnmodifiableClassException, IOException {
+    public static void premain(String agentArgs, Instrumentation inst) throws IOException, UnmodifiableClassException {
         var bootStrapJarPath = System.getProperty("matilda.bootstrap.jar");
         if (bootStrapJarPath == null) {
             throw new IllegalStateException("No matilda.bootstrap.jar file specified");
         }
 
         JarFile bootstrapJar = new JarFile(bootStrapJarPath);
-        // TODO check if 3 vars are needed
-        // TODO maybe it can be move all in one?
         var sysExitTransformer = new ClassFileTransformer() {
             @Override
             public byte[] transform(ClassLoader      loader,
@@ -56,11 +56,7 @@ public final class AgentMatilda {
                                     Class<?>         classBeingRedefined,
                                     ProtectionDomain protectionDomain,
                                     byte[]           classBytes) {
-                 if (loader != null && loader != ClassLoader.getPlatformClassLoader()) {
                     return processClasses(classBytes, new SystemExitTransformer());
-               } else {
-                     return null;
-                }
             }
         };
         inst.addTransformer(sysExitTransformer, true);
@@ -71,12 +67,7 @@ public final class AgentMatilda {
                                     Class<?>         classBeingRedefined,
                                     ProtectionDomain protectionDomain,
                                     byte[]           classBytes) {
-                // needs to be done separately because JVM can not exit
-                if (loader != null && loader != ClassLoader.getPlatformClassLoader()) {
-                    return null;
-                } else {
                     return processClasses(classBytes, new SystemExecTransformer());
-                }
               }
         };
         inst.addTransformer(sysExecTransformer, true);
@@ -88,7 +79,6 @@ public final class AgentMatilda {
                                     ProtectionDomain protectionDomain,
                                     byte[]           classBytes) {
                     return processClasses(classBytes, new NetworkSocketTransformer());
-
             }
         };
         // TODO explain why we need to put stuff on the bootclasspath
@@ -121,5 +111,4 @@ public final class AgentMatilda {
             return null;
         }
     }
-
 }

@@ -30,7 +30,7 @@ import java.util.logging.Logger;
 
 /**
  * The Matilda AccessController allows granting permissions per module via System.properties()
- *
+ *  TODO: please document how your property format works and how you con configure this
  */
 // Made class final so it can't be manipulated
 public final class MatildaAccessControl {
@@ -41,15 +41,19 @@ public final class MatildaAccessControl {
     private final Set<String> systemExecAllowPermissions;
     private final Set<String> networkConnectAllowPermissions;
 
+    // TODO document that this returns a singleton instance of the access control. ie. simple singleton pattern
     public static MatildaAccessControl getInstance() {
         return INSTANCE;
     }
 
     /**
-     * Costumized properties can be passed via the command line
+     * Customized properties can be passed via the command line
+     * // TODO this is not true the constructor uses only properties -- you need to document the format
      * @param properties - Properties should be passed via System.properties
      */
     public MatildaAccessControl(Properties properties) {
+        // TODO iterate over all the keys and see if there is any of them that we don't know that starts with matilda
+        // if so throw an exception -- also write a test for it
         String systemExistAllow = properties.getProperty("matilda.system.exit.allow", "");
         String systemExecAllow = properties.getProperty("matilda.system.exec.allow", "");
         String networkConnectAllow = properties.getProperty("matilda.network.connect.allow", "");
@@ -57,7 +61,10 @@ public final class MatildaAccessControl {
         this.systemExecAllowPermissions = Set.of(systemExecAllow.split(","));
         this.networkConnectAllowPermissions = Set.of(networkConnectAllow.split(","));
     }
+
+    // TODO document that this one is actually called by the methods instrumented in the agend
     public static void checkPermission(String method){
+        // this is an indirection to simplify the code generated in the agent
         INSTANCE.checkPermissionInternal(method);
     }
 
@@ -67,7 +74,7 @@ public final class MatildaAccessControl {
      * @throws RuntimeException - if method/ callers don't have the permissions to be executed
      *
      */
-    void checkPermissionInternal(String method) {
+    private void checkPermissionInternal(String method) {
         switch (method) {
             case "System.exit":
                 if (!checkSystemExit()) throw new RuntimeException("System.exit not allowed");
@@ -76,6 +83,7 @@ public final class MatildaAccessControl {
                 if(!checkSystemExec())throw new RuntimeException("ProceesBuilder.start(...) not allowed");
                 else return;
             case "Socket.connect":
+                // TODO fix the exceptin to actually reflect that it's socket.connect
                 if(!checkSocketPermission())throw new RuntimeException("Socket not allowed");
                 else return;
             default:
@@ -86,12 +94,15 @@ public final class MatildaAccessControl {
     /**
      *
      * Checks if caller has permission to call System.exit()
-     * @return boolean - returns true if caller has the right permissions
-     *
+     * @return boolean - true iff caller module has the right permissions otherwise false
+     * @see #callingClassModule() for reference how the caller module is identified
      */
-    boolean checkSystemExit() {
+    private boolean checkSystemExit() {
         var callingClass = callingClassModule();
+        // TODO assign the logger as a static var to this class..
         Logger logger = Logger.getLogger(MatildaAccessControl.class.getName());
+        // TODO level warning is too high use FINE
+        // TODO message should say module and should reflect that we are checking. also include the return value of the permission checking
         logger.log(Level.WARNING,"Class that initially called the method" + callingClass.toString() );
         return this.systemExitAllowPermissions.contains(callingClass.toString());
     }
@@ -100,11 +111,14 @@ public final class MatildaAccessControl {
      *
      * Checks if caller has permission to call System.exec()
      * @return boolean - returns true if caller has the right permissions
-     *
+     *  // TODO fix javadoc see checksystemexit
      */
-    boolean checkSystemExec() {
+    private boolean checkSystemExec() {
         var callingClass = callingClassModule();
+        // TODO assign the logger as a static var to this class..
         Logger logger = Logger.getLogger(MatildaAccessControl.class.getName());
+        // TODO level warning is too high use FINE
+        // TODO message should say module and should reflect that we are checking. also include the return value of the permission checking
         logger.log(Level.WARNING,"Class that initially called the method" + callingClass.toString() );
         return this.systemExecAllowPermissions.contains(callingClass.toString());
     }
@@ -114,30 +128,27 @@ public final class MatildaAccessControl {
      *
      * Checks if caller has permission to call Socket.connect()
      * @return boolean - returns true if caller has the right permissions
-     *
+     *  // TODO fix javadoc see checksystemexit
      */
-    boolean checkSocketPermission(){
+    private boolean checkSocketPermission(){
         var callingClass = callingClassModule();
+        // TODO assign the logger as a static var to this class..
         Logger logger = Logger.getLogger(MatildaAccessControl.class.getName());
-        logger.log(Level.WARNING,"Class that initially called the method" + callingClass.toString() );
+
+        // TODO level warning is too high use FINE
+        // TODO message should say module and should reflect that we are checking. also include the return value of the permission checking
+        logger.log(Level.WARNING,"Class that initially called the method {0} ", callingClass);
         return this.networkConnectAllowPermissions.contains(callingClass.toString());
     }
 
     /**
      *
-     *
+     * // TODO document here that we are exepcting this to be called in a certain order ie. skipping frames
      * @return Module - Returns module that initially called method
      *
      */
-    //TODO: do we need this?
     private Module callingClassModule() {
-        // checkSystemexit
-        // checkPermission
-        // Instantiation
-        // getTransformer
-        // method that we are looking for
-        // calling class
-        int framesToSkip = 1  // getCallingClass (this method)
+        final int framesToSkip = 1  // getCallingClass (this method)
                 + 1  // the checkXxx method
                 + 1  // Instantiation
                 + 1  // the runtime config method
@@ -151,7 +162,7 @@ public final class MatildaAccessControl {
      *
      * Iterates over the current Stack and skips specified number of elements
      * @param framesToSkip - number of frames, element on stack that should be skipped
-     * @return Module - calling Modul
+     * @return Module - calling Module
      */
     //TODO make private, is just public for testing purposes
     public Module callingClass(int framesToSkip) {
