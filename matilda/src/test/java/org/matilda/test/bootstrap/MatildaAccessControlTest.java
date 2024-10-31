@@ -20,27 +20,68 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.matilda.bootstrap.MatildaAccessControl;
 
+import java.net.Socket;
 import java.util.Properties;
 
-//TODO: make test mehtods camelCase
 class MatildaAccessControlTest {
-    // Don't forget to build first in order to have the updated jars
     @Test
-    void testCallingClassFrame0(){
-        Module callingClass = MatildaAccessControl.getInstance().callingClass(0);
-        Assertions.assertEquals("module matilda.core", callingClass.toString());
+    void testSystemExitAllowed(){
+        Properties props = new Properties();
+        props.setProperty("matilda.system.exit.allow","module org.junit.platform.commons");
+        MatildaAccessControl accessControl = new MatildaAccessControl(props);
+        accessControl.checkPermissionInternal("System.exit");
     }
 
     @Test
-    void testCallingClassFrame1(){
-        Module callingClass = MatildaAccessControl.getInstance().callingClass(1);
-        Assertions.assertEquals("module matilda.test", callingClass.toString());
+    void testSystemExitDenied(){
+        Properties props = new Properties();
+        MatildaAccessControl accessControl = new MatildaAccessControl(props);
+        RuntimeException uOE = Assertions.assertThrows(RuntimeException.class, () -> {
+            accessControl.checkPermissionInternal("ProcessBuilder.start");
+            Assertions.fail("should not have been able to exit the process");
+        });
+        Assertions.assertEquals("ProceesBuilder.start(...) not allowed", uOE.getMessage());
+
     }
 
     @Test
-    void testCallingClassFrame2(){
-        Module callingClass = MatildaAccessControl.getInstance().callingClass(2);
-        Assertions.assertEquals("module org.junit.platform.commons", callingClass.toString());
+    void testSystemExecAllowed(){
+        Properties props = new Properties();
+        props.setProperty("matilda.system.exec.allow","module org.junit.platform.commons");
+        MatildaAccessControl accessControl = new MatildaAccessControl(props);
+        accessControl.checkPermissionInternal("ProcessBuilder.start");
+    }
+
+    @Test
+    void testSystemExecDenied(){
+        Properties props = new Properties();
+        MatildaAccessControl accessControl = new MatildaAccessControl(props);
+        RuntimeException uOE = Assertions.assertThrows(RuntimeException.class, () -> {
+            accessControl.checkPermissionInternal("ProcessBuilder.start");
+            Assertions.fail("should not have been able to run a process");
+
+        });
+        Assertions.assertEquals("ProceesBuilder.start(...) not allowed", uOE.getMessage());
+    }
+
+    @Test
+    void testOpenSocketAllowed(){
+        Properties props = new Properties();
+        props.setProperty("matilda.network.connect.allow","module org.junit.platform.commons");
+        MatildaAccessControl accessControl = new MatildaAccessControl(props);
+        accessControl.checkPermissionInternal("Socket.connect");
+    }
+
+    @Test
+    void testOpenSocketDenied(){
+        Properties props = new Properties();
+        MatildaAccessControl accessControl = new MatildaAccessControl(props);
+        RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> {
+            accessControl.checkPermissionInternal("Socket.connect");
+            Assertions.fail("should not have been able to open a connection");
+        });
+        Assertions.assertEquals("Socket.connect not allowed", exception.getMessage());
+
     }
 
 

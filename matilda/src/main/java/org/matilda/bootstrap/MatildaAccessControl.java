@@ -40,6 +40,7 @@ public final class MatildaAccessControl {
     private final Set<String> systemExitAllowPermissions;
     private final Set<String> systemExecAllowPermissions;
     private final Set<String> networkConnectAllowPermissions;
+    static Logger logger;
 
     // TODO document that this returns a singleton instance of the access control. ie. simple singleton pattern
     public static MatildaAccessControl getInstance() {
@@ -74,7 +75,8 @@ public final class MatildaAccessControl {
      * @throws RuntimeException - if method/ callers don't have the permissions to be executed
      *
      */
-    private void checkPermissionInternal(String method) {
+    // should be private
+    public void checkPermissionInternal(String method) {
         switch (method) {
             case "System.exit":
                 if (!checkSystemExit()) throw new RuntimeException("System.exit not allowed");
@@ -84,7 +86,7 @@ public final class MatildaAccessControl {
                 else return;
             case "Socket.connect":
                 // TODO fix the exceptin to actually reflect that it's socket.connect
-                if(!checkSocketPermission())throw new RuntimeException("Socket not allowed");
+                if(!checkSocketPermission())throw new RuntimeException("Socket.connect not allowed");
                 else return;
             default:
                 throw new IllegalArgumentException("Unknown method: " + method);
@@ -99,11 +101,9 @@ public final class MatildaAccessControl {
      */
     private boolean checkSystemExit() {
         var callingClass = callingClassModule();
-        // TODO assign the logger as a static var to this class..
-        Logger logger = Logger.getLogger(MatildaAccessControl.class.getName());
-        // TODO level warning is too high use FINE
+        logger = Logger.getLogger(MatildaAccessControl.class.getName());
         // TODO message should say module and should reflect that we are checking. also include the return value of the permission checking
-        logger.log(Level.WARNING,"Class that initially called the method" + callingClass.toString() );
+        logger.log(Level.FINE,"Class that initially called the method " + callingClass.toString() );
         return this.systemExitAllowPermissions.contains(callingClass.toString());
     }
 
@@ -115,11 +115,9 @@ public final class MatildaAccessControl {
      */
     private boolean checkSystemExec() {
         var callingClass = callingClassModule();
-        // TODO assign the logger as a static var to this class..
-        Logger logger = Logger.getLogger(MatildaAccessControl.class.getName());
-        // TODO level warning is too high use FINE
+        logger = Logger.getLogger(MatildaAccessControl.class.getName());
         // TODO message should say module and should reflect that we are checking. also include the return value of the permission checking
-        logger.log(Level.WARNING,"Class that initially called the method" + callingClass.toString() );
+        logger.log(Level.FINE,"Class that initially called the method " + callingClass.toString() );
         return this.systemExecAllowPermissions.contains(callingClass.toString());
     }
 

@@ -56,7 +56,7 @@ public class AgentMatildaTest {
             Socket socket = new Socket("localhost", 9999);
             Assertions.fail("should not have been able to open a connection");
         });
-        Assertions.assertEquals("Socket not allowed", exception.getMessage());
+        Assertions.assertEquals("Socket.connect not allowed", exception.getMessage());
 
     }
 
@@ -69,7 +69,7 @@ public class AgentMatildaTest {
             InputStream response = connection.getInputStream();
             Assertions.fail("should not have been able to open a connection");
         });
-        Assertions.assertEquals("Socket not allowed", exception_url.getMessage());
+        Assertions.assertEquals("Socket.connect not allowed", exception_url.getMessage());
 
     }
 }
