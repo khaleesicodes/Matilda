@@ -16,8 +16,6 @@
  */
 module matilda.core {
     // TODO javadoc and license heaeder
-    // TODO we need to settle on a consistent naming here
-    // either we use org.matilda or org.matilda then we can also name it org.matilda.core and org.matilda.test
     requires java.logging;
     requires java.base;
     requires java.instrument;

@@ -39,8 +39,11 @@ public final class AgentMatilda {
 
     /**
      * // TODO explain how this method is hooked in the jvm --agentblafoo
+     * //TODO Check if we can use just one ClassFileTransformer and decide which Customized transformer is needed by checking the class type
+     * // Transform ClassFile befor it is loaded
      * @throws IOException - in the case of an exception during class loading
      * @throws UnmodifiableClassException - if one of the transformed classes can't be modified
+     * inst give access to an instance that allows manipulation of the behavior of the JVK
      */
     public static void premain(String agentArgs, Instrumentation inst) throws IOException, UnmodifiableClassException {
         var bootStrapJarPath = System.getProperty("matilda.bootstrap.jar");
@@ -49,6 +52,12 @@ public final class AgentMatilda {
         }
 
         JarFile bootstrapJar = new JarFile(bootStrapJarPath);
+
+        // Creation of ClassFile Transformer returns a Bytearray with
+         // Provides Classloader, ClassPath, Name of the Class, constant of the loaded class, Protection Domain, Classfile (Bytearray of actual class)
+        // Bytearray can be modified
+        // ClassFileTransformer will be triggered for any class that is loaded
+        // return null if class should not be modified -> managed in AccessController
         var sysExitTransformer = new ClassFileTransformer() {
             @Override
             public byte[] transform(ClassLoader      loader,
@@ -56,10 +65,13 @@ public final class AgentMatilda {
                                     Class<?>         classBeingRedefined,
                                     ProtectionDomain protectionDomain,
                                     byte[]           classBytes) {
+                    // returns manipulated bytearray
                     return processClasses(classBytes, new SystemExitTransformer());
             }
         };
         inst.addTransformer(sysExitTransformer, true);
+
+
         var sysExecTransformer = new ClassFileTransformer() {
             @Override
             public byte[] transform(ClassLoader      loader,
@@ -81,30 +93,42 @@ public final class AgentMatilda {
                     return processClasses(classBytes, new NetworkSocketTransformer());
             }
         };
-        // TODO explain why we need to put stuff on the bootclasspath
+
         inst.addTransformer(socketTransformer, true);
+        /*
+          retransformClasses allows retransformin Classes that were already loaded, this ensures that all parts of the
+          program are retransformed
+         */
         inst.retransformClasses(Socket.class, System.class, ProcessBuilder.class);
+        // TODO explain why we need to put stuff on the bootclasspath
         inst.appendToBootstrapClassLoaderSearch(bootstrapJar);
     }
 
+    //TODO Explain why to steps are needed for transformation
     @SuppressWarnings("preview")
-    private static ClassTransform getClassTransform(AtomicBoolean modified, MatildaCodeTransformer transformer) {
+    private static ClassTransform transformClass(AtomicBoolean modified, MatildaCodeTransformer transformer) {
         Predicate<CodeElement> predicate = transformer.getTransformPredicate();
-        CodeTransform rewriteSystemExit = transformer.getTransform(modified);
-        Predicate<MethodModel> invokesSystemExit =
+        CodeTransform codeTransform = transformer.getTransform(modified);
+        Predicate<MethodModel> invokesTransformer =
                 methodModel -> methodModel.code()
                         .map(codeModel ->
                                 codeModel.elementStream()
                                         .anyMatch(predicate)).orElse(false);
-        return ClassTransform.transformingMethodBodies(invokesSystemExit, rewriteSystemExit);
+        return ClassTransform.transformingMethodBodies(invokesTransformer, codeTransform);
     }
 
+    /**
+     *
+     * @param classBytes - Classbytes of class that should be tranformed
+     * @param transformer - Transformer that should be used
+     * @return byte[] - Transformed Class
+     */
     @SuppressWarnings("preview")
     static byte[] processClasses(byte[] classBytes, MatildaCodeTransformer transformer) {
         var modified = new AtomicBoolean();
         ClassFile cf = ClassFile.of(ClassFile.DebugElementsOption.DROP_DEBUG);
         ClassModel classModel = cf.parse(classBytes);
-        byte[] newClassBytes = cf.transform(classModel, getClassTransform(modified, transformer));
+        byte[] newClassBytes = cf.transform(classModel, transformClass(modified, transformer));
         if (modified.get()) {
             return newClassBytes;
         } else {

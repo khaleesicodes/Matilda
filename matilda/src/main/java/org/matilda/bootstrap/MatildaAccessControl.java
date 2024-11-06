@@ -5,9 +5,9 @@
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,7 +22,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 
 
 // TODO add javadocs
@@ -64,7 +63,7 @@ public final class MatildaAccessControl {
     }
 
     // TODO document that this one is actually called by the methods instrumented in the agend
-    public static void checkPermission(String method){
+    public static void checkPermission(String method) {
         // this is an indirection to simplify the code generated in the agent
         INSTANCE.checkPermissionInternal(method);
     }
@@ -82,11 +81,11 @@ public final class MatildaAccessControl {
                 if (!checkSystemExit()) throw new RuntimeException("System.exit not allowed");
                 else return;
             case "ProcessBuilder.start":
-                if(!checkSystemExec())throw new RuntimeException("ProceesBuilder.start(...) not allowed");
+                if (!checkSystemExec()) throw new RuntimeException("ProceesBuilder.start(...) not allowed");
                 else return;
             case "Socket.connect":
                 // TODO fix the exceptin to actually reflect that it's socket.connect
-                if(!checkSocketPermission())throw new RuntimeException("Socket.connect not allowed");
+                if (!checkSocketPermission()) throw new RuntimeException("Socket.connect not allowed");
                 else return;
             default:
                 throw new IllegalArgumentException("Unknown method: " + method);
@@ -103,7 +102,7 @@ public final class MatildaAccessControl {
         var callingClass = callingClassModule();
         logger = Logger.getLogger(MatildaAccessControl.class.getName());
         // TODO message should say module and should reflect that we are checking. also include the return value of the permission checking
-        logger.log(Level.FINE,"Class that initially called the method " + callingClass.toString() );
+        logger.log(Level.FINE, "Class that initially called the method " + callingClass.toString());
         return this.systemExitAllowPermissions.contains(callingClass.toString());
     }
 
@@ -117,7 +116,7 @@ public final class MatildaAccessControl {
         var callingClass = callingClassModule();
         logger = Logger.getLogger(MatildaAccessControl.class.getName());
         // TODO message should say module and should reflect that we are checking. also include the return value of the permission checking
-        logger.log(Level.FINE,"Class that initially called the method " + callingClass.toString() );
+        logger.log(Level.FINE, "Class that initially called the method " + callingClass.toString());
         return this.systemExecAllowPermissions.contains(callingClass.toString());
     }
 
@@ -128,14 +127,14 @@ public final class MatildaAccessControl {
      * @return boolean - returns true if caller has the right permissions
      *  // TODO fix javadoc see checksystemexit
      */
-    private boolean checkSocketPermission(){
+    private boolean checkSocketPermission() {
         var callingClass = callingClassModule();
         // TODO assign the logger as a static var to this class..
         Logger logger = Logger.getLogger(MatildaAccessControl.class.getName());
 
         // TODO level warning is too high use FINE
         // TODO message should say module and should reflect that we are checking. also include the return value of the permission checking
-        logger.log(Level.WARNING,"Class that initially called the method {0} ", callingClass);
+        logger.log(Level.WARNING, "Class that initially called the method {0} ", callingClass);
         return this.networkConnectAllowPermissions.contains(callingClass.toString());
     }
 
@@ -164,7 +163,7 @@ public final class MatildaAccessControl {
      */
     //TODO make private, is just public for testing purposes
     public Module callingClass(int framesToSkip) {
-        if(framesToSkip < 0) throw new IllegalArgumentException("framesToSkip must be >=0");
+        if (framesToSkip < 0) throw new IllegalArgumentException("framesToSkip must be >=0");
         Optional<Module> module = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE)
                 .walk(
                         s -> s.skip(framesToSkip)
