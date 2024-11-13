@@ -3,7 +3,7 @@ Matilda provides a light weight alternative to the deprecated Java Security Mana
 Currently it supports granular blocking of:
 * System.exit()
 * System Exec
-* Socket conntections
+* Socket connections
 
 
 # Usage
