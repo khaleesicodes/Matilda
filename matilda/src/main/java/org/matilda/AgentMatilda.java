@@ -40,12 +40,14 @@ public final class AgentMatilda {
     /**
      * // TODO explain how this method is hooked in the jvm --agentblafoo
      * //TODO Check if we can use just one ClassFileTransformer and decide which Customized transformer is needed by checking the class type
-     * // Transform ClassFile befor it is loaded
+     * // Transform ClassFile before it is loaded
+     * @param agentArgs - Specifies Agent that should be loaded, can be passed via -javaagent
+     * @param inst - initializes an Interface into low level JVM functionalities that allows bytecode manipulaion
      * @throws IOException - in the case of an exception during class loading
      * @throws UnmodifiableClassException - if one of the transformed classes can't be modified
-     * inst give access to an instance that allows manipulation of the behavior of the JVK
      */
     public static void premain(String agentArgs, Instrumentation inst) throws IOException, UnmodifiableClassException {
+        // Path to bootstrap jar that will be needed later
         var bootStrapJarPath = System.getProperty("matilda.bootstrap.jar");
         if (bootStrapJarPath == null) {
             throw new IllegalStateException("No matilda.bootstrap.jar file specified");
@@ -53,11 +55,11 @@ public final class AgentMatilda {
 
         JarFile bootstrapJar = new JarFile(bootStrapJarPath);
 
-        // Creation of ClassFile Transformer returns a Bytearray with
-         // Provides Classloader, ClassPath, Name of the Class, constant of the loaded class, Protection Domain, Classfile (Bytearray of actual class)
-        // Bytearray can be modified
-        // ClassFileTransformer will be triggered for any class that is loaded
-        // return null if class should not be modified -> managed in AccessController
+        /*
+          The ClassFileTransformer provides a byte Array of the loaded class, it will be triggered for any class loaded
+          return null if class should not be modified -> managed in AccessController
+         */
+
         var sysExitTransformer = new ClassFileTransformer() {
             @Override
             public byte[] transform(ClassLoader      loader,
@@ -96,15 +98,24 @@ public final class AgentMatilda {
 
         inst.addTransformer(socketTransformer, true);
         /*
-          retransformClasses allows retransformin Classes that were already loaded, this ensures that all parts of the
-          program are retransformed
+        Needs to be set to allow retransformation of classes that have been already loaded as the Agent is started
+        after System classes were loaded
          */
         inst.retransformClasses(Socket.class, System.class, ProcessBuilder.class);
-        // TODO explain why we need to put stuff on the bootclasspath
+        /*
+         * As a reference to the MatildaAccessController is injected into each of the tranformed classes, it needs to
+         * be accessible to the classloader of the classes or its parent. Since System classes are loaded by the
+         * platform classloader they need to be discoverable for the bootstrap classloader
+         */
         inst.appendToBootstrapClassLoaderSearch(bootstrapJar);
     }
 
-    //TODO Explain why to steps are needed for transformation
+    //TODO Explain why two steps are needed
+    /**
+     *
+     * @param modified - true if class has been modified else false
+     * @param transformer - Transformer that should be used
+     */
     @SuppressWarnings("preview")
     private static ClassTransform transformClass(AtomicBoolean modified, MatildaCodeTransformer transformer) {
         Predicate<CodeElement> predicate = transformer.getTransformPredicate();
@@ -118,7 +129,7 @@ public final class AgentMatilda {
     }
 
     /**
-     *
+     * Transforms the Bytearray into a ClassFile and manipulates it with a given Transformer
      * @param classBytes - Classbytes of class that should be tranformed
      * @param transformer - Transformer that should be used
      * @return byte[] - Transformed Class

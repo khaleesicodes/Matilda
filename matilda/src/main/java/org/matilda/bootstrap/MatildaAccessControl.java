@@ -62,7 +62,7 @@ public final class MatildaAccessControl {
         this.networkConnectAllowPermissions = Set.of(networkConnectAllow.split(","));
     }
 
-    // TODO document that this one is actually called by the methods instrumented in the agend
+    // TODO document that this one is actually called by the methods instrumented in the agent
     public static void checkPermission(String method) {
         // this is an indirection to simplify the code generated in the agent
         INSTANCE.checkPermissionInternal(method);
@@ -84,7 +84,6 @@ public final class MatildaAccessControl {
                 if (!checkSystemExec()) throw new RuntimeException("ProceesBuilder.start(...) not allowed");
                 else return;
             case "Socket.connect":
-                // TODO fix the exceptin to actually reflect that it's socket.connect
                 if (!checkSocketPermission()) throw new RuntimeException("Socket.connect not allowed");
                 else return;
             default:

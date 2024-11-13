@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 module matilda.core {
-    // TODO javadoc and license heaeder
+    // TODO javadoc
     requires java.logging;
     requires java.base;
     requires java.instrument;

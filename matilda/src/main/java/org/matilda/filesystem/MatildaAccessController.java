@@ -1,5 +1,4 @@
-package org.matilda.filesystem;
-
+package
 import java.nio.file.Path;
 
 public interface MatildaAccessController {
