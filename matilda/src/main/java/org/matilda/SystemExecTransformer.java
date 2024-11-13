@@ -24,12 +24,10 @@ import java.lang.constant.ClassDesc;
 import java.lang.constant.MethodTypeDesc;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
-//TODO javadocs
-// TODO explain that this is actually Runtime.getRuntime().exec(...)
+
 
 /**
- *
- *
+ * Custom Tranformes that allows granular blocking of System.exec() which is triggered by Runtime.getRuntime().exec(...)
  */
 @SuppressWarnings("preview")
 public class SystemExecTransformer implements MatildaCodeTransformer {
@@ -60,8 +58,6 @@ public class SystemExecTransformer implements MatildaCodeTransformer {
                         // L is a reference to className
                         && "([Ljava/lang/ProcessBuilder$Redirect;)Ljava/lang/Process;".equals(i.type().stringValue());
     }
-
-    // TODO document why this can't be a constant on MatildaAccessControl bc.of classloading issues
 
     /**
      * Transformes a class that test positiv for the TransformPredicate

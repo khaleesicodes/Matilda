@@ -25,10 +25,9 @@ import java.lang.constant.MethodTypeDesc;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 
-// TODO javadoc
 
 /**
- *
+ * Custom Tranformes that allows granular blocking of System.exit()
  */
 @SuppressWarnings("preview")
 public class SystemExitTransformer implements MatildaCodeTransformer {

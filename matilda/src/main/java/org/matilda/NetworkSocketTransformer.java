@@ -25,10 +25,8 @@ import java.lang.constant.MethodTypeDesc;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 
-// TODO add javadocs
-
 /**
- *
+ * Custom Tranformes that allows granular blocking of Network Connection
  */
 @SuppressWarnings("preview")
 public class NetworkSocketTransformer implements MatildaCodeTransformer{

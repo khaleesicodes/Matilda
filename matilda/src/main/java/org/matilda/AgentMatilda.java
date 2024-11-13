@@ -19,10 +19,6 @@ package org.matilda;
 import module java.base;
 import module java.instrument;
 
-
-// TODO add javadocs {@link org.matilda.bootstrap.MatildaAccessControl}
-// TODO explain how to hook this into the jvm and also explain that it adds our access controller on the boot classpath
-// otherwise the classes like System won't find the accessControl since they are all loaded by the bootclassloader
 /**
  *
  * The matilda agent allows the attachment to the JVM, manipulating the bytecode of all classes
@@ -38,9 +34,11 @@ import module java.instrument;
 public final class AgentMatilda {
 
     /**
-     * // TODO explain how this method is hooked in the jvm --agentblafoo
-     * //TODO Check if we can use just one ClassFileTransformer and decide which Customized transformer is needed by checking the class type
-     * // Transform ClassFile before it is loaded
+     * Agent needs to be hooked when JVM is started using the  following commandline argument
+     * "--enable-preview", - needs to be enabled to use ClassFile APU
+     * "-javaagent:${project.rootDir}/build/libs/matilda-agent-1.0-SNAPSHOT.jar", - Agent jar
+     * "-Dmatilda.bootstrap.jar=${project.rootDir}/build/libs/matilda-bootstrap-1.0-SNAPSHOT.jar - jar of AccessController
+     * Transforms ClassFile before it is loaded
      * @param agentArgs - Specifies Agent that should be loaded, can be passed via -javaagent
      * @param inst - initializes an Interface into low level JVM functionalities that allows bytecode manipulaion
      * @throws IOException - in the case of an exception during class loading

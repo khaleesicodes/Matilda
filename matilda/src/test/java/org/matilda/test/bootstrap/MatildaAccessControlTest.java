@@ -20,9 +20,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.matilda.bootstrap.MatildaAccessControl;
 
-import java.net.Socket;
-import java.util.Properties;
 
+import java.util.Properties;
+//TODO add javadoc
 class MatildaAccessControlTest {
     @Test
     void testSystemExitAllowed() {

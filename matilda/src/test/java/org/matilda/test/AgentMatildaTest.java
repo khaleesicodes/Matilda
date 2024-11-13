@@ -25,8 +25,7 @@ import java.net.URL;
 import java.net.URLConnection;
 
 // TODO javadoc
-// TODO bigger task -- add test methods for the Transformers --  need stubs and some mocks but doable
-// TODO need the ability to test if actually allows some code to pass checks
+
 
 public class AgentMatildaTest {
     @Test
@@ -42,7 +41,6 @@ public class AgentMatildaTest {
     @Test
     public void testSystemExecTransformer()  {
         RuntimeException uOE = Assertions.assertThrows(RuntimeException.class, () -> {
-            //TODO Fix to non deprecated version
             Runtime.getRuntime().exec("echo");
             Assertions.fail("should not have been able to run a process");
 
