@@ -24,8 +24,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
+
 // TODO add javadocs
-// TODO for testing need to be pluggable in some way maybe with subclass and non static methods MatildaTestAccessControl
 
 /**
  * The Matilda AccessController allows granting permissions per module via System.properties()
@@ -37,6 +37,7 @@ import java.util.logging.Logger;
 // Made class final so it can't be manipulated
 public final class MatildaAccessControl {
     // TODO: replace the Allowed modules with a simple check for "java.base"
+    // TODO: Fix, potential circular dependency
     private static final Set<Module> ALLOWED_MODULES = Set.of(System.class.getModule());
     private static final MatildaAccessControl INSTANCE = new MatildaAccessControl(System.getProperties());
     private final Set<String> systemExitAllowPermissions;
@@ -50,11 +51,11 @@ public final class MatildaAccessControl {
     }
 
     /**
-     * Customized properties can be passed via the command line
-     * // TODO this is not true the constructor uses only properties -- you need to document the format
+     * Instantiates properties that can be set over the commandline
      * @param properties - Properties should be passed via System.properties => matilda.system.exit.allow=Module that should be allowed
      */
     public MatildaAccessControl(Properties properties) {
+
         // TODO iterate over all the keys and see if there is any of them that we don't know that starts with matilda
         // if so throw an exception -- also write a test for it
         String systemExistAllow = properties.getProperty("matilda.system.exit.allow", "");
@@ -65,7 +66,11 @@ public final class MatildaAccessControl {
         this.networkConnectAllowPermissions = Set.of(networkConnectAllow.split(","));
     }
 
-    // TODO document that this one is actually called by the methods instrumented in the agent
+
+    /**
+     * Is called by method that is instrumented by the agent, this is necessary to get the correct call stack
+     * @param method - method that should be checked for permissions
+     */
     public static void checkPermission(String method) {
         // this is an indirection to simplify the code generated in the agent
         INSTANCE.checkPermissionInternal(method);
@@ -111,8 +116,8 @@ public final class MatildaAccessControl {
     /**
      *
      * Checks if caller has permission to call System.exec()
-     * @return boolean - returns true if caller has the right permissions
-     *  // TODO fix javadoc see checksystemexit
+     *@return boolean - true iff caller module has the right permissions otherwise false
+     *@see #callingClassModule() for reference how the caller module is identified
      */
     private boolean checkSystemExec() {
         var callingClass = callingClassModule();
@@ -126,23 +131,23 @@ public final class MatildaAccessControl {
     /**
      *
      * Checks if caller has permission to call Socket.connect()
-     * @return boolean - returns true if caller has the right permissions
-     *  // TODO fix javadoc see checksystemexit
+     *@return boolean - true iff caller module has the right permissions otherwise false
+     *@see #callingClassModule() for reference how the caller module is identified
      */
     private boolean checkSocketPermission() {
         var callingClass = callingClassModule();
         // TODO assign the logger as a static var to this class..
         Logger logger = Logger.getLogger(MatildaAccessControl.class.getName());
 
-        // TODO level warning is too high use FINE
         // TODO message should say module and should reflect that we are checking. also include the return value of the permission checking
-        logger.log(Level.WARNING, "Class that initially called the method {0} ", callingClass);
+        logger.log(Level.FINE, "Class that initially called the method {0} ", callingClass);
         return this.networkConnectAllowPermissions.contains(callingClass.toString());
     }
 
     /**
      *
-     * // TODO document here that we are exepcting this to be called in a certain order ie. skipping frames
+     * In order to identify the caller skipframes of the helper methods as well as the called method needs to be skipped
+     * needs to be adapted if structure of the AccessContoller changes
      * @return Module - Returns module that initially called method
      *
      */
