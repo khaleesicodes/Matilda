@@ -29,7 +29,10 @@ import java.util.logging.Logger;
 
 /**
  * The Matilda AccessController allows granting permissions per module via System.properties()
- *  TODO: please document how your property format works and how you con configure this
+ * permissions can be passed using the following format
+ * "matilda.<function>.allow=<Modul that should be allowed>"
+ * Example: -Dmatilda.system.exit.allow=module gradle.worker
+ *
  */
 // Made class final so it can't be manipulated
 public final class MatildaAccessControl {
@@ -49,7 +52,7 @@ public final class MatildaAccessControl {
     /**
      * Customized properties can be passed via the command line
      * // TODO this is not true the constructor uses only properties -- you need to document the format
-     * @param properties - Properties should be passed via System.properties
+     * @param properties - Properties should be passed via System.properties => matilda.system.exit.allow=Module that should be allowed
      */
     public MatildaAccessControl(Properties properties) {
         // TODO iterate over all the keys and see if there is any of them that we don't know that starts with matilda
