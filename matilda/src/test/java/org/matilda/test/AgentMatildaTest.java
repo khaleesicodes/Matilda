@@ -24,8 +24,10 @@ import java.net.Socket;
 import java.net.URL;
 import java.net.URLConnection;
 
-// TODO javadoc
 
+/**
+ * Tests the functionalities of the Agent and the customized transformer
+ */
 
 public class AgentMatildaTest {
     @Test

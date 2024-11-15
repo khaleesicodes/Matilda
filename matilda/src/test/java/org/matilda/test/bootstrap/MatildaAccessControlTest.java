@@ -22,8 +22,13 @@ import org.matilda.bootstrap.MatildaAccessControl;
 
 
 import java.util.Properties;
-//TODO add javadoc
+
+/**
+ * Class to Test functionalities by mocking a MatildaAccessController
+ * Test set the properties and test the configuration accordingly
+ */
 class MatildaAccessControlTest {
+
     @Test
     void testSystemExitAllowed() {
         Properties props = new Properties();

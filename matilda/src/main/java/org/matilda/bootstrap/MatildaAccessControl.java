@@ -32,9 +32,8 @@ import java.util.logging.Logger;
  * permissions can be passed using the following format
  * "matilda.<function>.allow=<Modul that should be allowed>"
  * Example: -Dmatilda.system.exit.allow=module gradle.worker
- *
  */
-// Made class final so it can't be manipulated
+// Class is final for security purpose, to supress any manipulation
 public final class MatildaAccessControl {
     // TODO: replace the Allowed modules with a simple check for "java.base"
     // TODO: Fix, potential circular dependency
@@ -80,7 +79,6 @@ public final class MatildaAccessControl {
      * Method checks if called method has the permissions to be executed
      * @param method - method that is currently called
      * @throws RuntimeException - if method/ callers don't have the permissions to be executed
-     *
      */
     // should be private
     public void checkPermissionInternal(String method) {
@@ -100,7 +98,6 @@ public final class MatildaAccessControl {
     }
 
     /**
-     *
      * Checks if caller has permission to call System.exit()
      * @return boolean - true iff caller module has the right permissions otherwise false
      * @see #callingClassModule() for reference how the caller module is identified
@@ -114,7 +111,6 @@ public final class MatildaAccessControl {
     }
 
     /**
-     *
      * Checks if caller has permission to call System.exec()
      *@return boolean - true iff caller module has the right permissions otherwise false
      *@see #callingClassModule() for reference how the caller module is identified
@@ -129,27 +125,22 @@ public final class MatildaAccessControl {
 
 
     /**
-     *
      * Checks if caller has permission to call Socket.connect()
      *@return boolean - true iff caller module has the right permissions otherwise false
      *@see #callingClassModule() for reference how the caller module is identified
      */
     private boolean checkSocketPermission() {
         var callingClass = callingClassModule();
-        // TODO assign the logger as a static var to this class..
-        Logger logger = Logger.getLogger(MatildaAccessControl.class.getName());
-
+        logger = Logger.getLogger(MatildaAccessControl.class.getName());
         // TODO message should say module and should reflect that we are checking. also include the return value of the permission checking
         logger.log(Level.FINE, "Class that initially called the method {0} ", callingClass);
         return this.networkConnectAllowPermissions.contains(callingClass.toString());
     }
 
     /**
-     *
      * In order to identify the caller skipframes of the helper methods as well as the called method needs to be skipped
      * needs to be adapted if structure of the AccessContoller changes
      * @return Module - Returns module that initially called method
-     *
      */
     private Module callingClassModule() {
         final int framesToSkip = 1  // getCallingClass (this method)
@@ -163,7 +154,6 @@ public final class MatildaAccessControl {
 
 
     /**
-     *
      * Iterates over the current Stack and skips specified number of elements
      * @param framesToSkip - number of frames, element on stack that should be skipped
      * @return Module - calling Module
