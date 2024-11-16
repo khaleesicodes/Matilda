@@ -48,7 +48,8 @@ public class SystemExitTransformer implements MatildaCodeTransformer {
         return codeElement -> codeElement instanceof InvokeInstruction i
                 // checks if i is invoked virtual
                 && i.opcode() == Opcode.INVOKESTATIC
-                // compare class we are looking for to method owner of the currently called method using their internal byte name
+                // compare class we are looking for to method owner of the currently called
+                // method using their internal byte name
                 && "java/lang/System".equals(i.owner().asInternalName())
                 // check if method called equals start method
                 && "exit".equals(i.name().stringValue())

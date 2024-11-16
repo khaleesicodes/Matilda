@@ -25,7 +25,6 @@ import java.util.logging.Logger;
 
 
 
-// TODO add javadocs
 
 /**
  * The Matilda AccessController allows granting permissions per module via System.properties()
