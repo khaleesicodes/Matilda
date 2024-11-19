@@ -9,16 +9,25 @@ repositories {
     mavenCentral()
 }
 
-// Configuration of Java compiler in order to run JDK with preview features
-tasks.withType(JavaCompile).configureEach {
-    options.compilerArgs += "--enable-preview"
+
+// run configuration with MatildaAgent
+task run(type: JavaExec) {
+    group = "Execution"
+    description = "Run the main class with MatildaAgent enabled"
+    classpath = sourceSets.main.runtimeClasspath
+    jvmArgs += ["--enable-preview","-javaagent:${project.rootDir}/libs/matilda-agent-1.0-SNAPSHOT.jar",
+                "-Dmatilda.bootstrap.jar=${project.rootDir}/libs/matilda-bootstrap-1.0-SNAPSHOT.jar"]
+    mainClass = "org.matilda.POC"
 }
 
-tasks.withType(JavaExec).configureEach {
-    jvmArgs += ["--enable-preview","-javaagent:${project.rootDir}/build/libs/matilda-agent-1.0-SNAPSHOT.jar",
-                "-Dmatilda.bootstrap.jar=${project.rootDir}/build/libs/matilda-bootstrap-1.0-SNAPSHOT.jar"]
-
+// run configuration without matilda agent
+task runNoAgent(type: JavaExec) {
+    group = "Execution"
+    description = "Run the main class with JavaExecTask without the agent"
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = "org.matilda.POC"
 }
+
 dependencies {
     implementation platform('org.junit:junit-bom:5.10.0')
     implementation 'org.junit.jupiter:junit-jupiter'
