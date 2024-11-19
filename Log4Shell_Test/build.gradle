@@ -9,7 +9,6 @@ repositories {
     mavenCentral()
 }
 
-
 // run configuration with MatildaAgent
 task run(type: JavaExec) {
     group = "Execution"
