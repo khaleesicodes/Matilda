@@ -24,15 +24,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
-
-
 /**
  * The Matilda AccessController allows granting permissions per module via System.properties()
  * permissions can be passed using the following format
  * "matilda.<function>.allow=<Modul that should be allowed>"
  * Example: -Dmatilda.system.exit.allow=module gradle.worker
  */
-// Class is final for security purpose, to supress any manipulation
+// Class is final for security reasons, to supress any manipulation
 public final class MatildaAccessControl {
     // TODO: replace the Allowed modules with a simple check for "java.base"
     // TODO: Fix, potential circular dependency
@@ -41,9 +39,12 @@ public final class MatildaAccessControl {
     private final Set<String> systemExitAllowPermissions;
     private final Set<String> systemExecAllowPermissions;
     private final Set<String> networkConnectAllowPermissions;
-    static Logger logger;
-
-    // TODO document that this returns a singleton instance of the access control. ie. simple singleton pattern
+    private static final Logger logger = Logger.getLogger(MatildaAccessControl.class.getName());
+    /**
+     * Creates a single instances of MatildaAccessControl using the singleton pattern, in order to ensure that there is
+     * no manipulation
+     * @return MatildaAccessControl - Instances that is used to do Accesscontrol
+     */
     public static MatildaAccessControl getInstance() {
         return INSTANCE;
     }
@@ -53,7 +54,6 @@ public final class MatildaAccessControl {
      * @param properties - Properties should be passed via System.properties => matilda.system.exit.allow=Module that should be allowed
      */
     public MatildaAccessControl(Properties properties) {
-
         // TODO iterate over all the keys and see if there is any of them that we don't know that starts with matilda
         // if so throw an exception -- also write a test for it
         String systemExistAllow = properties.getProperty("matilda.system.exit.allow", "");
@@ -83,13 +83,19 @@ public final class MatildaAccessControl {
     public void checkPermissionInternal(String method) {
         switch (method) {
             case "System.exit":
-                if (!checkSystemExit()) throw new RuntimeException("System.exit not allowed");
+                if (!checkSystemExit()) {
+                    throw new RuntimeException("System.exit not allowed");
+                }
                 else return;
             case "ProcessBuilder.start":
-                if (!checkSystemExec()) throw new RuntimeException("ProceesBuilder.start(...) not allowed");
+                if (!checkSystemExec()) {
+                    throw new RuntimeException("ProceesBuilder.start(...) not allowed");
+                }
                 else return;
             case "Socket.connect":
-                if (!checkSocketPermission()) throw new RuntimeException("Socket.connect not allowed");
+                if (!checkSocketPermission()) {
+                    throw new RuntimeException("Socket.connect not allowed");
+                }
                 else return;
             default:
                 throw new IllegalArgumentException("Unknown method: " + method);
@@ -103,7 +109,6 @@ public final class MatildaAccessControl {
      */
     private boolean checkSystemExit() {
         var callingClass = callingClassModule();
-        logger = Logger.getLogger(MatildaAccessControl.class.getName());
         // TODO message should say module and should reflect that we are checking. also include the return value of the permission checking
         logger.log(Level.FINE, "Class that initially called the method " + callingClass.toString());
         return this.systemExitAllowPermissions.contains(callingClass.toString());
@@ -116,7 +121,6 @@ public final class MatildaAccessControl {
      */
     private boolean checkSystemExec() {
         var callingClass = callingClassModule();
-        logger = Logger.getLogger(MatildaAccessControl.class.getName());
         // TODO message should say module and should reflect that we are checking. also include the return value of the permission checking
         logger.log(Level.FINE, "Class that initially called the method " + callingClass.toString());
         return this.systemExecAllowPermissions.contains(callingClass.toString());
@@ -130,7 +134,6 @@ public final class MatildaAccessControl {
      */
     private boolean checkSocketPermission() {
         var callingClass = callingClassModule();
-        logger = Logger.getLogger(MatildaAccessControl.class.getName());
         // TODO message should say module and should reflect that we are checking. also include the return value of the permission checking
         logger.log(Level.FINE, "Class that initially called the method {0} ", callingClass);
         return this.networkConnectAllowPermissions.contains(callingClass.toString());
@@ -142,7 +145,8 @@ public final class MatildaAccessControl {
      * @return Module - Returns module that initially called method
      */
     private Module callingClassModule() {
-        final int framesToSkip = 1  // getCallingClass (this method)
+        final int framesToSkip =
+                1  // getCallingClass (this method)
                 + 1  // the checkXxx method
                 + 1  // Instantiation
                 + 1  // the runtime config method

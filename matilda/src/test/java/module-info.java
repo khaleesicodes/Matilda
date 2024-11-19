@@ -17,6 +17,7 @@
 module matilda.test {
     requires matilda.core;
     requires org.junit.jupiter.api;
+    requires org.apache.logging.log4j;
     opens org.matilda.test to org.junit.platform.commons;
     opens org.matilda.test.bootstrap to org.junit.platform.commons;
 }
