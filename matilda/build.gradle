@@ -39,8 +39,8 @@ tasks.withType(JavaCompile).configureEach {
     options.compilerArgs += "--enable-preview"
 }
 
-//TODO explain why two jars are needed
-// Configuration to run Test with the right parameters, a separate jar is needed to properly run the Java Agent
+// The matilda-agent.jar supplies the java agent that need to be attached when the jvm is started, the bootstrap jar needs
+// to be appended to the botstrap class path to avoid class loading conflicts
 tasks.withType(Test).configureEach {
     jvmArgs += ["--enable-preview","-javaagent:${project.rootDir}/build/libs/matilda-agent-1.0-SNAPSHOT.jar",
                 "-Dmatilda.bootstrap.jar=${project.rootDir}/build/libs/matilda-bootstrap-1.0-SNAPSHOT.jar"]
