@@ -168,7 +168,7 @@ public final class MatildaAccessControl {
      * @param framesToSkip - number of frames, element on stack that should be skipped
      * @return Module - calling Module
      */
-    //TODO make private, is just public for testing purposes
+    // Is not private as MatildaAccessControl can only be instantiated once
     public Module callingClass(int framesToSkip) {
         if (framesToSkip < 0) throw new IllegalArgumentException("framesToSkip must be >=0");
         Optional<Module> module = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE)

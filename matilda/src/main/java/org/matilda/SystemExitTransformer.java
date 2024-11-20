@@ -27,7 +27,7 @@ import java.util.function.Predicate;
 
 
 /**
- * Custom Transformer that allows granular blocking of System.exit()
+ * Custom transformer that allows granular blocking of System.exit()
  */
 @SuppressWarnings("preview")
 public class SystemExitTransformer implements MatildaCodeTransformer {
@@ -59,8 +59,8 @@ public class SystemExitTransformer implements MatildaCodeTransformer {
     }
 
     /**
-     * Transformes a class that test positiv for the TransformPredicate
-     * @param modified - Flags wether class has been transformed
+     * Transforms a class that test positive for the TransformPredicate
+     * @param modified - Flags whether class has been transformed
      *
      */
     @Override

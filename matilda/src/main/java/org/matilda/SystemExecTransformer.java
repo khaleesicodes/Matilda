@@ -27,7 +27,7 @@ import java.util.function.Predicate;
 
 
 /**
- * Custom Tranformes that allows granular blocking of System.exec() which is triggered by Runtime.getRuntime().exec(...)
+ * Custom transformer that allows granular blocking of System.exec() which is triggered by Runtime.getRuntime().exec(...)
  */
 @SuppressWarnings("preview")
 public class SystemExecTransformer implements MatildaCodeTransformer {
@@ -60,8 +60,8 @@ public class SystemExecTransformer implements MatildaCodeTransformer {
     }
 
     /**
-     * Transformes a class that test positiv for the TransformPredicate
-     * @param modified - Flags wether class has been transformed
+     * Transforms a class that test positive for the TransformPredicate
+     * @param modified - Flags whether class has been transformed
      *
      */
     @Override

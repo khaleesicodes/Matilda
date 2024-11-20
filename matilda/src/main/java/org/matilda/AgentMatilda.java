@@ -36,11 +36,11 @@ public final class AgentMatilda {
     /**
      * Agent needs to be hooked when JVM is started using the  following commandline argument
      * "--enable-preview", - needs to be enabled to use ClassFile APU
-     * "-javaagent:${project.rootDir}/build/libs/matilda-agent-1.0-SNAPSHOT.jar", - Agent jar
-     * "-Dmatilda.bootstrap.jar=${project.rootDir}/build/libs/matilda-bootstrap-1.0-SNAPSHOT.jar - jar of AccessController
+     * "-javaagent:/path/to/matilda-agent.jar", - Agent jar
+     * "-Dmatilda.bootstrap.jar=/path/to/matilda-bootstrap.jar - jar of AccessController
      * Transforms ClassFile before it is loaded
      * @param agentArgs - Specifies Agent that should be loaded, can be passed via -javaagent
-     * @param inst - initializes an Interface into low level JVM functionalities that allows bytecode manipulaion
+     * @param inst - initializes an Interface into low level JVM functionalities that allows bytecode manipulation
      * @throws IOException - in the case of an exception during class loading
      * @throws UnmodifiableClassException - if one of the transformed classes can't be modified
      */
@@ -65,9 +65,9 @@ public final class AgentMatilda {
                                     Class<?>         classBeingRedefined,
                                     ProtectionDomain protectionDomain,
                                     byte[]           classBytes) {
-                    // returns manipulated bytearray
-                    return processClasses(classBytes, new SystemExitTransformer());
+                return processClasses(classBytes, new SystemExitTransformer());
             }
+
         };
         inst.addTransformer(sysExitTransformer, true);
 
@@ -83,6 +83,7 @@ public final class AgentMatilda {
               }
         };
         inst.addTransformer(sysExecTransformer, true);
+
         var socketTransformer = new ClassFileTransformer() {
             @Override
             public byte[] transform(ClassLoader      loader,
@@ -90,7 +91,7 @@ public final class AgentMatilda {
                                     Class<?>         classBeingRedefined,
                                     ProtectionDomain protectionDomain,
                                     byte[]           classBytes) {
-                    return processClasses(classBytes, new NetworkSocketTransformer());
+                return processClasses(classBytes, new NetworkSocketTransformer());
             }
         };
 
@@ -101,18 +102,18 @@ public final class AgentMatilda {
          */
         inst.retransformClasses(Socket.class, System.class, ProcessBuilder.class);
         /*
-         * As a reference to the MatildaAccessController is injected into each of the tranformed classes, it needs to
+         * As a reference to the MatildaAccessController is injected into each of the transformed classes, it needs to
          * be accessible to the classloader of the classes or its parent. Since System classes are loaded by the
          * platform classloader they need to be discoverable for the bootstrap classloader
          */
         inst.appendToBootstrapClassLoaderSearch(bootstrapJar);
     }
 
-    //TODO Explain why two steps are needed
     /**
-     *
-     * @param modified - true if class has been modified else false
-     * @param transformer - Transformer that should be used
+     * Performs the actual transformation of a method / class with the provided {@link }MatildaCodeTransformer}
+     * @param modified - this is set by transformer to indicate if the class has actually been transformed. It's set to
+     *                 true if class has been transformed otherwise false
+     * @param transformer - Transformer that should be used to perform the transformation
      */
     @SuppressWarnings("preview")
     private static ClassTransform transformClass(AtomicBoolean modified, MatildaCodeTransformer transformer) {
@@ -128,13 +129,13 @@ public final class AgentMatilda {
 
     /**
      * Transforms the Bytearray into a ClassFile and manipulates it with a given Transformer
-     * @param classBytes - Classbytes of class that should be tranformed
+     * @param classBytes - byte representation of the class that should be tranformed
      * @param transformer - Transformer that should be used
-     * @return byte[] - Transformed Class
+     * @return byte[] - Transformed Class or null if it's not been transformed.
      */
     @SuppressWarnings("preview")
     static byte[] processClasses(byte[] classBytes, MatildaCodeTransformer transformer) {
-        var modified = new AtomicBoolean();
+        var modified = new AtomicBoolean(false);
         ClassFile cf = ClassFile.of(ClassFile.DebugElementsOption.DROP_DEBUG);
         ClassModel classModel = cf.parse(classBytes);
         byte[] newClassBytes = cf.transform(classModel, transformClass(modified, transformer));

@@ -59,8 +59,8 @@ public class NetworkSocketTransformer implements MatildaCodeTransformer{
     }
 
     /**
-     * Transformes a class that test positiv for the TransformPredicate
-     * @param modified - Flags wether class has been transformed
+     * Transforms a class that test positive for the TransformPredicate
+     * @param modified - Flags whether class has been transformed
      *
      */
     @Override
