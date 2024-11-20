@@ -27,11 +27,14 @@ import java.util.logging.Logger;
 /**
  * The Matilda AccessController allows granting permissions per module via System.properties()
  * permissions can be passed using the following format
- * "matilda.<function>.allow=<Modul that should be allowed>"
+ * "matilda.<function>.allow=<Module that should be allowed>"
  * Example: -Dmatilda.system.exit.allow=module gradle.worker
+ *
+ * @author Elina Eickstaedt
  */
 // Class is final for security reasons, to supress any manipulation
 public final class MatildaAccessControl {
+    // TODO: it would be nice if the configuration would not require the module prefix
     // TODO: replace the Allowed modules with a simple check for "java.base"
     // TODO: Fix, potential circular dependency
     private static final Set<Module> ALLOWED_MODULES = Set.of(System.class.getModule());
@@ -40,19 +43,23 @@ public final class MatildaAccessControl {
     private final Set<String> systemExecAllowPermissions;
     private final Set<String> networkConnectAllowPermissions;
     private static final Logger logger = Logger.getLogger(MatildaAccessControl.class.getName());
+
     /**
-     * Creates a single instances of MatildaAccessControl using the singleton pattern, in order to ensure that there is
-     * no manipulation
-     * @return MatildaAccessControl - Instances that is used to do Accesscontrol
+     * Creates and returns a single instances of MatildaAccessControl using the singleton pattern,
+     * This instance is created with {@link System#getProperties()} configured via the commandline
+     * in order to ensure that there is no manipulation
+     * @return MatildaAccessControl - Instances that is used to do access control
      */
     public static MatildaAccessControl getInstance() {
         return INSTANCE;
     }
 
     /**
-     * Instantiates properties that can be set over the commandline
+     * Creates a new MatildaAccessControl instance configured via properties.
+     *
      * @param properties - Properties should be passed via System.properties => matilda.system.exit.allow=Module that should be allowed
      */
+    // public only for testing
     public MatildaAccessControl(Properties properties) {
         // TODO iterate over all the keys and see if there is any of them that we don't know that starts with matilda
         // if so throw an exception -- also write a test for it
@@ -69,7 +76,7 @@ public final class MatildaAccessControl {
      * Is called by method that is instrumented by the agent, this is necessary to get the correct call stack
      * @param method - method that should be checked for permissions
      */
-    public static void checkPermission(String method) {
+    public static void checkPermission(String method) { // seems unused since we inject this into the generated code
         // this is an indirection to simplify the code generated in the agent
         INSTANCE.checkPermissionInternal(method);
     }
@@ -133,10 +140,10 @@ public final class MatildaAccessControl {
      *@see #callingClassModule() for reference how the caller module is identified
      */
     private boolean checkSocketPermission() {
-        var callingClass = callingClassModule();
+        var callingModule = callingClassModule();
         // TODO message should say module and should reflect that we are checking. also include the return value of the permission checking
-        logger.log(Level.FINE, "Class that initially called the method {0} ", callingClass);
-        return this.networkConnectAllowPermissions.contains(callingClass.toString());
+        logger.log(Level.FINE, "Module that initially called the method {0} ", callingModule);
+        return this.networkConnectAllowPermissions.contains(callingModule.toString());
     }
 
     /**
