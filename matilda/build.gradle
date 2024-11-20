@@ -41,6 +41,7 @@ tasks.withType(JavaCompile).configureEach {
 
 // The matilda-agent.jar supplies the java agent that need to be attached when the jvm is started, the bootstrap jar needs
 // to be appended to the botstrap class path to avoid class loading conflicts
+// TODO check for variable that updates jar version
 tasks.withType(Test).configureEach {
     jvmArgs += ["--enable-preview","-javaagent:${project.rootDir}/build/libs/matilda-agent-1.0-SNAPSHOT.jar",
                 "-Dmatilda.bootstrap.jar=${project.rootDir}/build/libs/matilda-bootstrap-1.0-SNAPSHOT.jar"]
