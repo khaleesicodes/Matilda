@@ -16,10 +16,8 @@
  */
 package org.matilda;
 
-import java.lang.classfile.CodeElement;
 import java.lang.classfile.CodeTransform;
-import java.lang.classfile.Opcode;
-import java.lang.classfile.instruction.InvokeInstruction;
+import java.lang.classfile.MethodModel;
 import java.lang.constant.ClassDesc;
 import java.lang.constant.MethodTypeDesc;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -31,6 +29,29 @@ import java.util.function.Predicate;
  */
 @SuppressWarnings("preview")
 public class SystemExitTransformer implements MatildaCodeTransformer {
+
+    private final AtomicBoolean hasRun = new AtomicBoolean(false);
+    /**
+     * Transforms a class that test positive for the TransformPredicate*
+     */
+    @Override
+    public CodeTransform getTransform() {
+        return (codeBuilder, codeElement) -> {
+            if (!hasRun.getAndSet(true)) { // this must only be run / added once on top of the method
+                var accessControl = ClassDesc.of("org.matilda.bootstrap.MatildaAccessControl");
+                    var methodTypeDesc = MethodTypeDesc.ofDescriptor("(Ljava/lang/String;)V");
+                    codeBuilder
+                            // Needs to be hard coded in order to not run into classpath issues when using MatildaAccessControl, as it is not loaded yet
+                            .ldc("System.exit")
+                            .invokestatic(accessControl, "checkPermission", methodTypeDesc)
+                            .with(codeElement);
+                } else {
+                    codeBuilder.with(codeElement);
+                }
+            };
+        }
+
+
     /**
      * Matches CodeElement (Instruction) against elements specific to the java.lang.System exit() and returns true accordingly
      * A CodeModel describes a Code attribute; we can iterate over its CodeElements and handle those that
@@ -44,43 +65,13 @@ public class SystemExitTransformer implements MatildaCodeTransformer {
      * check if method has the correct method descriptor
      */
     @Override
-    public Predicate<CodeElement> getTransformPredicate() {
-        return codeElement -> codeElement instanceof InvokeInstruction i
-                // checks if i is invoked virtual
-                && i.opcode() == Opcode.INVOKESTATIC
-                // compare class we are looking for to method owner of the currently called
-                // method using their internal byte name
-                && "java/lang/System".equals(i.owner().asInternalName())
-                // check if method called equals start method
-                && "exit".equals(i.name().stringValue())
-                //check for the correct method descriptor
-                // L is a reference to className
-                && "(I)V".equals(i.type().stringValue());
+    public Predicate<MethodModel> getModelPredicate() {
+        return methodElements -> {
+            String internalName = methodElements.parent().get().thisClass().asInternalName();
+                return internalName.equals("java/lang/Runtime")
+                    && "exit".equals(methodElements.methodName().stringValue())
+                    && "(I)V".equals(methodElements.methodType().stringValue());
+        };
     }
-
-    /**
-     * Transforms a class that test positive for the TransformPredicate
-     * @param modified - Flags whether class has been transformed
-     *
-     */
-    @Override
-    public CodeTransform getTransform(AtomicBoolean modified) {
-        Predicate<CodeElement> predicate = getTransformPredicate();
-        return (codeBuilder, codeElement) -> {
-            if (predicate.test(codeElement)) {
-                    var accessControl = ClassDesc.of("org.matilda.bootstrap.MatildaAccessControl");
-                    var methodTypeDesc = MethodTypeDesc.ofDescriptor("(Ljava/lang/String;)V");
-                    codeBuilder
-                            // Needs to be hard coded in order to not run into classpath issues when using MatildaAccessControl, as it is not loaded yet
-                            .ldc("System.exit")
-                            .invokestatic(accessControl, "checkPermission", methodTypeDesc)
-                            .with(codeElement);
-
-                    modified.set(true);
-                } else {
-                    codeBuilder.with(codeElement);
-                }
-            };
-        }
-    }
+}
 

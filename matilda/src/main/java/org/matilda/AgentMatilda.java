@@ -53,54 +53,55 @@ public final class AgentMatilda {
 
         JarFile bootstrapJar = new JarFile(bootStrapJarPath);
 
+
         /*
           The ClassFileTransformer provides a byte Array of the loaded class, it will be triggered for any class loaded
           return null if class should not be modified -> managed in AccessController
          */
-
-        var sysExitTransformer = new ClassFileTransformer() {
+        var transformer = new ClassFileTransformer() {
             @Override
             public byte[] transform(ClassLoader      loader,
                                     String           className,
                                     Class<?>         classBeingRedefined,
                                     ProtectionDomain protectionDomain,
                                     byte[]           classBytes) {
-                return processClasses(classBytes, new SystemExitTransformer());
+                switch (className) {
+                    case "java/lang/ProcessBuilder":
+                        return processClasses(classBytes, new SystemExecTransformer());
+                    case "java/net/Socket":
+                        return processClasses(classBytes, new NetworkSocketTransformer());
+                    default:
+                        return null;
+                }
             }
 
         };
-        inst.addTransformer(sysExitTransformer, true);
+        inst.addTransformer(transformer, false);
 
-
-        var sysExecTransformer = new ClassFileTransformer() {
+        var retransform = new ClassFileTransformer() {
+            private final AtomicBoolean wasExecuted = new AtomicBoolean(false);
             @Override
             public byte[] transform(ClassLoader      loader,
                                     String           className,
                                     Class<?>         classBeingRedefined,
                                     ProtectionDomain protectionDomain,
                                     byte[]           classBytes) {
-                    return processClasses(classBytes, new SystemExecTransformer());
-              }
-        };
-        inst.addTransformer(sysExecTransformer, true);
-
-        var socketTransformer = new ClassFileTransformer() {
-            @Override
-            public byte[] transform(ClassLoader      loader,
-                                    String           className,
-                                    Class<?>         classBeingRedefined,
-                                    ProtectionDomain protectionDomain,
-                                    byte[]           classBytes) {
-                return processClasses(classBytes, new NetworkSocketTransformer());
+                if (className.equals("java/lang/Runtime")) {
+                    if (!wasExecuted.getAndSet(true)) {
+                        return processClasses(classBytes, new SystemExitTransformer());
+                    }
+                }
+                return null;
             }
-        };
 
-        inst.addTransformer(socketTransformer, true);
+        };
+        inst.addTransformer(retransform, true);
         /*
-        Needs to be set to allow retransformation of classes that have been already loaded as the Agent is started
+        Needs to be set to allow retransformation of Runtime class as the Agent is started
         after System classes were loaded
          */
-        inst.retransformClasses(Socket.class, System.class, ProcessBuilder.class);
+        inst.retransformClasses(Runtime.class);
+
         /*
          * As a reference to the MatildaAccessController is injected into each of the transformed classes, it needs to
          * be accessible to the classloader of the classes or its parent. Since System classes are loaded by the
@@ -109,21 +110,15 @@ public final class AgentMatilda {
         inst.appendToBootstrapClassLoaderSearch(bootstrapJar);
     }
 
+    //TODO merge methods
     /**
      * Performs the actual transformation of a method / class with the provided {@link }MatildaCodeTransformer}
-     * @param modified - this is set by transformer to indicate if the class has actually been transformed. It's set to
-     *                 true if class has been transformed otherwise false
      * @param transformer - Transformer that should be used to perform the transformation
      */
     @SuppressWarnings("preview")
-    private static ClassTransform transformClass(AtomicBoolean modified, MatildaCodeTransformer transformer) {
-        Predicate<CodeElement> predicate = transformer.getTransformPredicate();
-        CodeTransform codeTransform = transformer.getTransform(modified);
-        Predicate<MethodModel> invokesTransformer =
-                methodModel -> methodModel.code()
-                        .map(codeModel ->
-                                codeModel.elementStream()
-                                        .anyMatch(predicate)).orElse(false);
+    private static ClassTransform transformClass(MatildaCodeTransformer transformer) {
+        CodeTransform codeTransform = transformer.getTransform();
+        Predicate<MethodModel> invokesTransformer = transformer.getModelPredicate();
         return ClassTransform.transformingMethodBodies(invokesTransformer, codeTransform);
     }
 
@@ -135,14 +130,8 @@ public final class AgentMatilda {
      */
     @SuppressWarnings("preview")
     static byte[] processClasses(byte[] classBytes, MatildaCodeTransformer transformer) {
-        var modified = new AtomicBoolean(false);
         ClassFile cf = ClassFile.of(ClassFile.DebugElementsOption.DROP_DEBUG);
         ClassModel classModel = cf.parse(classBytes);
-        byte[] newClassBytes = cf.transform(classModel, transformClass(modified, transformer));
-        if (modified.get()) {
-            return newClassBytes;
-        } else {
-            return null;
-        }
+        return cf.transform(classModel, transformClass(transformer));
     }
 }

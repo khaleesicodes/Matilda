@@ -16,10 +16,8 @@
  */
 package org.matilda;
 
-import java.lang.classfile.CodeElement;
 import java.lang.classfile.CodeTransform;
-import java.lang.classfile.Opcode;
-import java.lang.classfile.instruction.InvokeInstruction;
+import java.lang.classfile.MethodModel;
 import java.lang.constant.ClassDesc;
 import java.lang.constant.MethodTypeDesc;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -30,6 +28,32 @@ import java.util.function.Predicate;
  */
 @SuppressWarnings("preview")
 public class NetworkSocketTransformer implements MatildaCodeTransformer{
+
+    private final AtomicBoolean hasRun = new AtomicBoolean(false);
+
+    /**
+     * Transforms a class that test positive for the TransformPredicate*
+     */
+    @Override
+    public CodeTransform getTransform() {
+        //TODO find out if whole class or just specific method is being rewritten
+        //TODO Check why tranform doesn't work for url connect
+        return (codeBuilder, codeElement) -> {
+            System.err.println("NETWORK:" + codeElement);
+            if (!hasRun.getAndSet(true)) { // this must only be run / added once on top of the method
+                var accessControl = ClassDesc.of("org.matilda.bootstrap.MatildaAccessControl");
+                var methodTypeDesc = MethodTypeDesc.ofDescriptor("(Ljava/lang/String;)V");
+                codeBuilder
+                        // Needs to be hard coded in order to not run into classpath issues when using MatildaAccessControl, as it is not loaded yet
+                        .ldc("Socket.connect")
+                        .invokestatic(accessControl, "checkPermission", methodTypeDesc)
+                        .with(codeElement);
+            } else {
+                codeBuilder.with(codeElement);
+            }
+        };
+    }
+
     /**
      * Matches CodeElement (Instruction) against elements specific to the java.net.Socket connect() and returns true accordingly
      * A CodeModel describes a Code attribute; we can iterate over its CodeElements and handle those that
@@ -43,44 +67,12 @@ public class NetworkSocketTransformer implements MatildaCodeTransformer{
      * check if method has the correct method descriptor
      */
     @Override
-    public Predicate<CodeElement> getTransformPredicate() {
-        // TODO eventually add other network methods
-        return codeElement ->
-                codeElement instanceof InvokeInstruction i
-                        // checks if i is invoked virtual
-                        && i.opcode() == Opcode.INVOKEVIRTUAL
-                        // compare class we are looking for to method owner of the currently called method using their internal byte name
-                        && "java/net/Socket".equals(i.owner().asInternalName())
-                        // check if method called equals start method
-                        && "connect".equals(i.name().stringValue())
-                        //check for the correct method descriptor
-                        // L is a reference to className
-                        && "(Ljava/net/SocketAddress;)V".equals(i.type().stringValue());
-    }
-
-    /**
-     * Transforms a class that test positive for the TransformPredicate
-     * @param modified - Flags whether class has been transformed
-     *
-     */
-    @Override
-    public CodeTransform getTransform(AtomicBoolean modified) {
-        //TODO find out if whole class or just specific method is being rewritten
-        //TODO Check why tranform doesn't work for url connect
-        Predicate<CodeElement> predicate = getTransformPredicate();
-        return (codeBuilder, codeElement) -> {
-            if (predicate.test(codeElement)) {
-                var accessControl = ClassDesc.of("org.matilda.bootstrap.MatildaAccessControl");
-                var methodTypeDesc = MethodTypeDesc.ofDescriptor("(Ljava/lang/String;)V");
-                codeBuilder
-                        // Needs to be hard coded in order to not run into classpath issues when using MatildaAccessControl, as it is not loaded yet
-                        .ldc("Socket.connect")
-                        .invokestatic(accessControl, "checkPermission", methodTypeDesc)
-                        .with(codeElement);
-                modified.set(true);
-            } else {
-                codeBuilder.with(codeElement);
-            }
+    public Predicate<MethodModel> getModelPredicate() {
+        return methodElements -> {
+            String internalName = methodElements.parent().get().thisClass().asInternalName();
+            return internalName.equals("java/net/Socket")
+                    && "connect".equals(methodElements.methodName().stringValue())
+                    && "(Ljava/net/SocketAddress;)V".equals(methodElements.methodType().stringValue());
         };
     }
 

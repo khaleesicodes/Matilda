@@ -16,9 +16,8 @@
  */
 package org.matilda;
 
-import java.lang.classfile.CodeElement;
 import java.lang.classfile.CodeTransform;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.lang.classfile.MethodModel;
 import java.util.function.Predicate;
 
 /**
@@ -29,16 +28,16 @@ import java.util.function.Predicate;
  */
 @SuppressWarnings("preview")
 public interface MatildaCodeTransformer {
+
     /**
      * Matches CodeElement (Instruction) against elements specific to the java.net.Socket connect() and returns true accordingly
      * A CodeModel describes a Code attribute; we can iterate over its CodeElements and handle those that
      * include symbolic references to other types (JEP466)
      **/
-    Predicate<CodeElement> getTransformPredicate();
+    Predicate<MethodModel> getModelPredicate();
+
     /**
-     * Transforms a class that test positive for the TransformPredicate
-     * @param modified - Flags whether class has been transformed
-     *
+     * Transforms a class that test positive for the TransformPredicate*
      */
-    CodeTransform getTransform(AtomicBoolean modified);
+    CodeTransform getTransform();
 }

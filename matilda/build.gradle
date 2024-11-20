@@ -81,7 +81,7 @@ jar.dependsOn(agentJar, bootstrapJar)
 test {
     jvmArgs += ["--enable-preview","-javaagent:${project.rootDir}/build/libs/matilda-agent-1.0-SNAPSHOT.jar",
                 "-Dmatilda.bootstrap.jar=${project.rootDir}/build/libs/matilda-bootstrap-1.0-SNAPSHOT.jar",
-                "-Dmatilda.system.exit.allow=module gradle.worker"]
+                "-Dmatilda.system.exit.allow=module gradle.worker", "-Dmatilda.system.exec.allow=module matilda.core"]
     useJUnitPlatform()
     testLogging {
         exceptionFormat = 'full'

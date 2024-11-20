@@ -18,8 +18,14 @@ package org.matilda.test;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.matilda.bootstrap.Caller;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.Socket;
 import java.net.URL;
 import java.net.URLConnection;
@@ -38,16 +44,36 @@ public class AgentMatildaTest {
         });
         Assertions.assertEquals("System.exit not allowed", uOE.getMessage());
 
+        // now with reflection
+        uOE = Assertions.assertThrows(RuntimeException.class, () -> {
+            Class<?> aClass = Class.forName("java.lang.System");
+            Method exit = aClass.getMethod("exit", int.class);
+            try {
+                exit.invoke(null, 1);
+            } catch (InvocationTargetException e) {
+                throw e.getCause();
+            }
+            Assertions.fail("should not have been able to exit the process");
+        });
+        Assertions.assertEquals("System.exit not allowed", uOE.getMessage());
     }
 
     @Test
-    public void testSystemExecTransformer()  {
+    public void testSystemExecTransformer() throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, IOException {
         RuntimeException uOE = Assertions.assertThrows(RuntimeException.class, () -> {
             Runtime.getRuntime().exec("echo");
             Assertions.fail("should not have been able to run a process");
-
         });
         Assertions.assertEquals("ProceesBuilder.start(...) not allowed", uOE.getMessage());
+        Class<?> aClass = Class.forName("java.lang.Runtime");
+        Method exec = aClass.getMethod("exec", String.class);
+
+        Process echo = (Process) Caller.call(Runtime.getRuntime(), exec, "echo foo");
+        Assertions.assertEquals(0, echo.exitValue());
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader( echo.getInputStream()))) {
+            String value = reader.readLine();
+            Assertions.assertEquals("foo", value);
+        }
     }
 
     @Test
@@ -57,7 +83,7 @@ public class AgentMatildaTest {
             Assertions.fail("should not have been able to open a connection");
         });
         Assertions.assertEquals("Socket.connect not allowed", exception.getMessage());
-
+        // TODO add a test that uses org.matilda.bootstrap.Caller to establish a network connection with a small server
     }
 
     @Test
@@ -70,6 +96,7 @@ public class AgentMatildaTest {
             Assertions.fail("should not have been able to open a connection");
         });
         Assertions.assertEquals("Socket.connect not allowed", exception_url.getMessage());
-
     }
+
+
 }
