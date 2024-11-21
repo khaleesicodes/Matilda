@@ -42,7 +42,7 @@ public class SystemExitTransformer implements MatildaCodeTransformer {
                     var methodTypeDesc = MethodTypeDesc.ofDescriptor("(Ljava/lang/String;)V");
                     codeBuilder
                             // Needs to be hard coded in order to not run into classpath issues when using MatildaAccessControl, as it is not loaded yet
-                            .ldc("System.exit")
+                            .ldc("Runtime.exit")
                             .invokestatic(accessControl, "checkPermission", methodTypeDesc)
                             .with(codeElement);
                 } else {

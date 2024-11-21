@@ -45,7 +45,7 @@ public class AgentMatildaTest {
             System.exit(-1);
             Assertions.fail("should not have been able to exit the process");
         });
-        Assertions.assertEquals("System.exit not allowed", uOE.getMessage());
+        Assertions.assertEquals("Runtime.exit not allowed", uOE.getMessage());
 
         // now with reflection
         uOE = Assertions.assertThrows(RuntimeException.class, () -> {
@@ -58,7 +58,7 @@ public class AgentMatildaTest {
             }
             Assertions.fail("should not have been able to exit the process");
         });
-        Assertions.assertEquals("System.exit not allowed", uOE.getMessage());
+        Assertions.assertEquals("Runtime.exit not allowed", uOE.getMessage());
     }
 
     @Test

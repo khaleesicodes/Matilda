@@ -32,9 +32,9 @@ class MatildaAccessControlTest {
     @Test
     void testSystemExitAllowed() {
         Properties props = new Properties();
-        props.setProperty("matilda.system.exit.allow", "module org.junit.platform.commons");
+        props.setProperty("matilda.runtime.exit.allow", "module org.junit.platform.commons");
         MatildaAccessControl accessControl = new MatildaAccessControl(props);
-        accessControl.checkPermissionInternal("System.exit");
+        accessControl.checkPermissionInternal("Runtime.exit");
     }
 
     @Test
@@ -44,7 +44,7 @@ class MatildaAccessControlTest {
         RuntimeException uOE = Assertions.assertThrows(RuntimeException.class, () -> {
             MatildaAccessControl accessControl = new MatildaAccessControl(props);
         });
-        Assertions.assertEquals("matilda.system.foo.allow is not a valid key. Allowed keys are: matilda.system.exit.allow, matilda.system.exec.allow,matilda.network.connect.allow", uOE.getMessage());
+        Assertions.assertEquals("matilda.system.foo.allow is not a valid key. Allowed keys are: matilda.runtime.exit.allow, matilda.system.exec.allow,matilda.network.connect.allow", uOE.getMessage());
     }
 
     @Test

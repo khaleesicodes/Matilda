@@ -30,7 +30,7 @@ import java.util.regex.Pattern;
  * The Matilda AccessController allows granting permissions per module via System.properties()
  * permissions can be passed using the following format
  * "matilda.<function>.allow=<Module that should be allowed>"
- * Example: -Dmatilda.system.exit.allow=module gradle.worker
+ * Example: -Dmatilda.runtime.exit.allow=module gradle.worker
  *
  * @author Elina Eickstaedt
  */
@@ -59,7 +59,7 @@ public final class MatildaAccessControl {
     /**
      * Creates a new MatildaAccessControl instance configured via properties.
      *
-     * @param properties - Properties should be passed via System.properties => matilda.system.exit.allow=Module that should be allowed
+     * @param properties - Properties should be passed via System.properties => matilda.runtime.exit.allow=Module that should be allowed
      */
     // public only for testing
     public MatildaAccessControl(Properties properties) {
@@ -69,18 +69,18 @@ public final class MatildaAccessControl {
                 String key = elem.toString();
                 if (key.startsWith("matilda.")){
                     switch (key){
-                        case "matilda.system.exit.allow":
+                        case "matilda.runtime.exit.allow":
                         case "matilda.system.exec.allow":
                         case "matilda.network.connect.allow":
                         case "matilda.bootstrap.jar":
                             break;
-                        default: throw new IllegalArgumentException(elem + " is not a valid key. Allowed keys are: matilda.system.exit.allow, matilda.system.exec.allow,matilda.network.connect.allow");
+                        default: throw new IllegalArgumentException(elem + " is not a valid key. Allowed keys are: matilda.runtime.exit.allow, matilda.system.exec.allow,matilda.network.connect.allow");
                     }
                 }
             }
 
         }
-        String systemExistAllow = properties.getProperty("matilda.system.exit.allow", "");
+        String systemExistAllow = properties.getProperty("matilda.runtime.exit.allow", "");
         String systemExecAllow = properties.getProperty("matilda.system.exec.allow", "");
         String networkConnectAllow = properties.getProperty("matilda.network.connect.allow", "");
 
@@ -122,9 +122,9 @@ public final class MatildaAccessControl {
     // should be private
     public void checkPermissionInternal(String method) {
         switch (method) {
-            case "System.exit":
+            case "Runtime.exit":
                 if (!checkSystemExit()) {
-                    throw new RuntimeException("System.exit not allowed");
+                    throw new RuntimeException("Runtime.exit not allowed");
                 }
                 else return;
             case "ProcessBuilder.start":
