@@ -58,6 +58,8 @@ tasks.withType(JavaExec).configureEach {
 task bootstrapJar(type: Jar) {
     from(sourceSets.main.output) {
         include "org/matilda/bootstrap/**"
+        exclude "org/matilda/bootstrap/Caller.class" // this is a testing class that should not be packaged
+
     }
     archiveBaseName = 'matilda-bootstrap'
 }
@@ -81,7 +83,8 @@ jar.dependsOn(agentJar, bootstrapJar)
 test {
     jvmArgs += ["--enable-preview","-javaagent:${project.rootDir}/build/libs/matilda-agent-1.0-SNAPSHOT.jar",
                 "-Dmatilda.bootstrap.jar=${project.rootDir}/build/libs/matilda-bootstrap-1.0-SNAPSHOT.jar",
-                "-Dmatilda.system.exit.allow=module gradle.worker", "-Dmatilda.system.exec.allow=module matilda.core"]
+                // needs to be allowed so gradle worker can exit and negative Test cases work
+                "-Dmatilda.system.exit.allow=module gradle.worker", "-Dmatilda.system.exec.allow=module matilda.core", "-Dmatilda.network.connect.allow=module matilda.core"]
     useJUnitPlatform()
     testLogging {
         exceptionFormat = 'full'

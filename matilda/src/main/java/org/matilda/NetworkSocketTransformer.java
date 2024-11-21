@@ -36,10 +36,8 @@ public class NetworkSocketTransformer implements MatildaCodeTransformer{
      */
     @Override
     public CodeTransform getTransform() {
-        //TODO find out if whole class or just specific method is being rewritten
         //TODO Check why tranform doesn't work for url connect
         return (codeBuilder, codeElement) -> {
-            System.err.println("NETWORK:" + codeElement);
             if (!hasRun.getAndSet(true)) { // this must only be run / added once on top of the method
                 var accessControl = ClassDesc.of("org.matilda.bootstrap.MatildaAccessControl");
                 var methodTypeDesc = MethodTypeDesc.ofDescriptor("(Ljava/lang/String;)V");

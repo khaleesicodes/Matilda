@@ -24,11 +24,14 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.Socket;
-import java.net.URL;
-import java.net.URLConnection;
+import java.net.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 
 /**
@@ -59,16 +62,18 @@ public class AgentMatildaTest {
     }
 
     @Test
-    public void testSystemExecTransformer() throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, IOException {
+    public void testSystemExecTransformer() throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, IOException, InterruptedException {
         RuntimeException uOE = Assertions.assertThrows(RuntimeException.class, () -> {
             Runtime.getRuntime().exec("echo");
             Assertions.fail("should not have been able to run a process");
         });
         Assertions.assertEquals("ProceesBuilder.start(...) not allowed", uOE.getMessage());
+
         Class<?> aClass = Class.forName("java.lang.Runtime");
         Method exec = aClass.getMethod("exec", String.class);
 
         Process echo = (Process) Caller.call(Runtime.getRuntime(), exec, "echo foo");
+        echo.waitFor(3, TimeUnit.SECONDS);
         Assertions.assertEquals(0, echo.exitValue());
         try (BufferedReader reader = new BufferedReader(new InputStreamReader( echo.getInputStream()))) {
             String value = reader.readLine();
@@ -83,7 +88,59 @@ public class AgentMatildaTest {
             Assertions.fail("should not have been able to open a connection");
         });
         Assertions.assertEquals("Socket.connect not allowed", exception.getMessage());
-        // TODO add a test that uses org.matilda.bootstrap.Caller to establish a network connection with a small server
+    }
+
+    @Test
+    public void serverConnectionBlockTest() throws InterruptedException, IOException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException {
+        // AtomicBoolean to check if the socket has read any bytes, that's the indicator if the exploit worked or not
+        AtomicBoolean hasRead = new AtomicBoolean(false);
+        // Create latch in order to allow thread to wait for other operation before continuing
+        CountDownLatch latch = new CountDownLatch(1);
+        // Create reference grant access to the socket to obtain the socket port and to stop the socket
+        AtomicReference<ServerSocket> socketRef = new AtomicReference<>();
+        Thread server = new Thread(() -> {
+            try (ServerSocket serverSocket = new ServerSocket()) {
+                socketRef.set(serverSocket);
+                serverSocket.bind(new InetSocketAddress("localhost", 0));
+
+                latch.countDown();
+
+                // checks if connection to socket was requested
+                try (Socket accept = serverSocket.accept()) {
+
+                    try (InputStream stream = accept.getInputStream()) {
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+                        Assertions.assertEquals("Test connection", reader.readLine());
+                        hasRead.set(true);
+                    }
+                }
+            } catch (IOException e) {
+                if (socketRef.get().isClosed()) {
+                    // ignore
+                } else {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+        server.start();
+        latch.await();
+        int port = socketRef.get().getLocalPort();
+
+        Class<Socket> networkClass = Socket.class;
+        Constructor<Socket> networkClassConstructor = networkClass.getConstructor(String.class, int.class);
+
+        try(Socket clientSocket = Caller.call(networkClassConstructor,"localhost", port)){
+            clientSocket.getOutputStream().write("Test connection".getBytes());
+        };
+        // checks if the clientSocket was able to connect to the server
+        Assertions.assertTrue(hasRead.get(), "Socket connect has not been blocked");
+
+        try {
+            socketRef.get().close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        server.join();
     }
 
     @Test

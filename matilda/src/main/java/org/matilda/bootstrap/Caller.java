@@ -16,6 +16,7 @@
  */
 package org.matilda.bootstrap;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -23,5 +24,9 @@ public final class Caller {
 
     public static Object call(Object inst, Method method, Object... args) throws InvocationTargetException, IllegalAccessException {
         return method.invoke(inst, args);
+    }
+
+    public static <T> T call(Constructor<T> constructor, Object... args) throws InvocationTargetException, IllegalAccessException, InstantiationException {
+        return constructor.newInstance(args);
     }
 }
