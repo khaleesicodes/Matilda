@@ -36,7 +36,7 @@ Matilda comes with a module-based whitelisting approach, permission can be set p
 
 Configuration can also be done via the CLI or build file following the naming scheme:
 ```bash
--Dmatilda.system.exit.allow=module /<insert module name here/>
+-Dmatilda.runtime.exit.allow=module /<insert module name here/>
 -Dmatilda.system.exec.allow=module /<insert module name here/>
 -Dmatilda.network.connect.allow=module /<insert module name here/>
 ```
