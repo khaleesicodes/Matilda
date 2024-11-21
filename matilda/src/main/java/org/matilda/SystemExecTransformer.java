@@ -54,24 +54,25 @@ public class SystemExecTransformer implements MatildaCodeTransformer {
     }
 
     /**
-     * Matches CodeElement (Instruction) against elements specific to the java.lang.ProcessBuilder.start()
-     * returns true accordingly
-     * A CodeModel describes a Code attribute; we can iterate over its CodeElements and handle those that
-     * include symbolic references to other types (JEP466)
-     * @return Predicate - Holds structure of class that should be transformed
-     * Matches method calls that look like this Runtime.getRuntime().exec("echo");
-     * Uses the invokeinstruction of current codeElement, as we are looking for a method that is invoked virtual we check
-     * for INVOKEVIRTUAL
+     * Matches MethodeElement against characteristics specific to the java.net.System exec and returns true accordingly
+     * MethoModel models a method and can be traversed with a stream
+     *
+     * @return Predicate - Holds structure of method that should be transformed
+     * Gets the method owner/ class method is an element of
      * as we are looking for methods owned by "java/lang/ProcessBuilder" we check for the owner
-     * check if method that is called is the start method
+     * check if method that is called is the connect method
      * check if method has the correct method descriptor
      */
     @Override
     public Predicate<MethodModel> getModelPredicate() {
         return methodElements -> {
+            // Get class method is an element of
             String internalName = methodElements.parent().get().thisClass().asInternalName();
+            // Check if its parent is the ProcessBuilder Class
             return internalName.equals("java/lang/ProcessBuilder")
+                    // Matches Methode
                     && "start".equals(methodElements.methodName().stringValue())
+                    // Matches Methode Type
                     && "([Ljava/lang/ProcessBuilder$Redirect;)Ljava/lang/Process;".equals(methodElements.methodType().stringValue());
         };
     }

@@ -37,7 +37,7 @@ public interface MatildaCodeTransformer {
     Predicate<MethodModel> getModelPredicate();
 
     /**
-     * Transforms a class that test positive for the TransformPredicate*
+     * Transforms a class that test positive for the TransformPredicate
      */
     CodeTransform getTransform();
 }

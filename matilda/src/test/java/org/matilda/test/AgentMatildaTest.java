@@ -47,7 +47,7 @@ public class AgentMatildaTest {
         });
         Assertions.assertEquals("Runtime.exit not allowed", uOE.getMessage());
 
-        // now with reflection
+        // Tests if matilda also protects against the use of reflections
         uOE = Assertions.assertThrows(RuntimeException.class, () -> {
             Class<?> aClass = Class.forName("java.lang.System");
             Method exit = aClass.getMethod("exit", int.class);
@@ -72,6 +72,7 @@ public class AgentMatildaTest {
         Class<?> aClass = Class.forName("java.lang.Runtime");
         Method exec = aClass.getMethod("exec", String.class);
 
+        // Tests if matilda also protects against the use of reflections
         Process echo = (Process) Caller.call(Runtime.getRuntime(), exec, "echo foo");
         echo.waitFor(3, TimeUnit.SECONDS);
         Assertions.assertEquals(0, echo.exitValue());
@@ -90,8 +91,17 @@ public class AgentMatildaTest {
         Assertions.assertEquals("Socket.connect not allowed", exception.getMessage());
     }
 
+    /**
+     * Test the "negative" case e.g. if a connection can be achieved when permissions are granted
+     * @throws InterruptedException
+     * @throws IOException
+     * @throws NoSuchMethodException
+     * @throws InvocationTargetException
+     * @throws IllegalAccessException
+     * @throws InstantiationException
+     */
     @Test
-    public void serverConnectionBlockTest() throws InterruptedException, IOException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException {
+    public void serverConnectionNotBlockTest() throws InterruptedException, IOException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException {
         // AtomicBoolean to check if the socket has read any bytes, that's the indicator if the exploit worked or not
         AtomicBoolean hasRead = new AtomicBoolean(false);
         // Create latch in order to allow thread to wait for other operation before continuing
@@ -102,9 +112,7 @@ public class AgentMatildaTest {
             try (ServerSocket serverSocket = new ServerSocket()) {
                 socketRef.set(serverSocket);
                 serverSocket.bind(new InetSocketAddress("localhost", 0));
-
                 latch.countDown();
-
                 // checks if connection to socket was requested
                 try (Socket accept = serverSocket.accept()) {
 
@@ -126,14 +134,16 @@ public class AgentMatildaTest {
         latch.await();
         int port = socketRef.get().getLocalPort();
 
+        // Gets Socket class
         Class<Socket> networkClass = Socket.class;
+        // Get Constructor for Socket, this is needed in order to get a non transformed version of the Socket class
         Constructor<Socket> networkClassConstructor = networkClass.getConstructor(String.class, int.class);
 
         try(Socket clientSocket = Caller.call(networkClassConstructor,"localhost", port)){
             clientSocket.getOutputStream().write("Test connection".getBytes());
         };
         // checks if the clientSocket was able to connect to the server
-        Assertions.assertTrue(hasRead.get(), "Socket connect has not been blocked");
+        Assertions.assertTrue(hasRead.get(), "Socket connect has been blocked");
 
         try {
             socketRef.get().close();

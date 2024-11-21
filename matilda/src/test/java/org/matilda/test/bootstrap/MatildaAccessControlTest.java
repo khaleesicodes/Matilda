@@ -29,6 +29,9 @@ import java.util.Properties;
  */
 class MatildaAccessControlTest {
 
+    /**
+     * Test if setting permissions works for SystemExit
+     */
     @Test
     void testSystemExitAllowed() {
         Properties props = new Properties();
@@ -37,36 +40,9 @@ class MatildaAccessControlTest {
         accessControl.checkPermissionInternal("Runtime.exit");
     }
 
-    @Test
-    void testMaleFormedPropertyKey() {
-        Properties props = new Properties();
-        props.setProperty("matilda.system.foo.allow", "module org.junit.platform.commons");
-        RuntimeException uOE = Assertions.assertThrows(RuntimeException.class, () -> {
-            MatildaAccessControl accessControl = new MatildaAccessControl(props);
-        });
-        Assertions.assertEquals("matilda.system.foo.allow is not a valid key. Allowed keys are: matilda.runtime.exit.allow, matilda.system.exec.allow,matilda.network.connect.allow", uOE.getMessage());
-    }
-
-    @Test
-    void testMaleFormedPropertyValue() {
-        Properties props = new Properties();
-        props.setProperty("matilda.system.exec.allow", "module org junit.platform.commons");
-        RuntimeException uOE = Assertions.assertThrows(RuntimeException.class, () -> {
-            MatildaAccessControl accessControl = new MatildaAccessControl(props);
-        });
-        Assertions.assertEquals("Not a valid module name: module org junit.platform.commons", uOE.getMessage());
-    }
-
-    @Test
-    void testMaleFormedPropertyValueSpelling() {
-        Properties props = new Properties();
-        props.setProperty("matilda.system.exec.allow", "m0dule org junit.platform.commons");
-        RuntimeException uOE = Assertions.assertThrows(RuntimeException.class, () -> {
-            MatildaAccessControl accessControl = new MatildaAccessControl(props);
-        });
-        Assertions.assertEquals("Not a valid module name: m0dule org junit.platform.commons", uOE.getMessage());
-    }
-
+    /**
+     * Tests if blocking works when no permissions are granted (default)
+     */
     @Test
     void testSystemExitDenied() {
         Properties props = new Properties();
@@ -79,6 +55,9 @@ class MatildaAccessControlTest {
 
     }
 
+    /**
+     * Test if setting permissions works for SystemExec
+     */
     @Test
     void testSystemExecAllowed() {
         Properties props = new Properties();
@@ -87,6 +66,9 @@ class MatildaAccessControlTest {
         accessControl.checkPermissionInternal("ProcessBuilder.start");
     }
 
+    /**
+     * Tests if blocking works when no permissions are granted (default)
+     */
     @Test
     void testSystemExecDenied() {
         Properties props = new Properties();
@@ -99,6 +81,9 @@ class MatildaAccessControlTest {
         Assertions.assertEquals("ProceesBuilder.start(...) not allowed", uOE.getMessage());
     }
 
+    /**
+     * Test if setting permissions works for Socket.connect()
+     */
     @Test
     void testOpenSocketAllowed() {
         Properties props = new Properties();
@@ -107,6 +92,9 @@ class MatildaAccessControlTest {
         accessControl.checkPermissionInternal("Socket.connect");
     }
 
+    /**
+     * Tests if blocking works when no permissions are granted (default)
+     */
     @Test
     void testOpenSocketDenied() {
         Properties props = new Properties();
@@ -118,6 +106,49 @@ class MatildaAccessControlTest {
         Assertions.assertEquals("Socket.connect not allowed", exception.getMessage());
 
     }
+
+
+    /**
+     * Tests input validation for keys
+     */
+    @Test
+    void testMaleFormedPropertyKey() {
+        Properties props = new Properties();
+        props.setProperty("matilda.system.foo.allow", "module org.junit.platform.commons");
+        // Needed to extract Exceptio
+        RuntimeException uOE = Assertions.assertThrows(RuntimeException.class, () -> {
+            MatildaAccessControl accessControl = new MatildaAccessControl(props);
+        });
+        Assertions.assertEquals("matilda.system.foo.allow is not a valid key. Allowed keys are: matilda.runtime.exit.allow, matilda.system.exec.allow,matilda.network.connect.allow", uOE.getMessage());
+    }
+
+    /**
+     * Tests input validation for property values
+     */
+    @Test
+    void testMaleFormedPropertyValue() {
+        Properties props = new Properties();
+        props.setProperty("matilda.system.exec.allow", "module org junit.platform.commons");
+        RuntimeException uOE = Assertions.assertThrows(RuntimeException.class, () -> {
+            MatildaAccessControl accessControl = new MatildaAccessControl(props);
+        });
+        Assertions.assertEquals("Not a valid module name: module org junit.platform.commons", uOE.getMessage());
+    }
+
+    /**
+     * Tests input validation for property values
+     */
+    @Test
+    void testMaleFormedPropertyValueSpelling() {
+        Properties props = new Properties();
+        props.setProperty("matilda.system.exec.allow", "m0dule org junit.platform.commons");
+        RuntimeException uOE = Assertions.assertThrows(RuntimeException.class, () -> {
+            MatildaAccessControl accessControl = new MatildaAccessControl(props);
+        });
+        Assertions.assertEquals("Not a valid module name: m0dule org junit.platform.commons", uOE.getMessage());
+    }
+
+
 
 
 }

@@ -61,7 +61,6 @@ public final class MatildaAccessControl {
      *
      * @param properties - Properties should be passed via System.properties => matilda.runtime.exit.allow=Module that should be allowed
      */
-    // public only for testing
     public MatildaAccessControl(Properties properties) {
         // validates syntax correctness of property configuration
         for(Object elem:properties.keySet()){
@@ -80,10 +79,12 @@ public final class MatildaAccessControl {
             }
 
         }
+        // Initialization of method specific properties
         String systemExistAllow = properties.getProperty("matilda.runtime.exit.allow", "");
         String systemExecAllow = properties.getProperty("matilda.system.exec.allow", "");
         String networkConnectAllow = properties.getProperty("matilda.network.connect.allow", "");
 
+        // Loading and validation of set configuration
         this.systemExitAllowPermissions = validateModuleConfig(
                 systemExistAllow.isEmpty()? Set.of() : Set.of(systemExistAllow.split(",")));
         this.systemExecAllowPermissions = validateModuleConfig(
@@ -92,6 +93,11 @@ public final class MatildaAccessControl {
                 networkConnectAllow.isEmpty() ? Set.of() : Set.of(networkConnectAllow.split(",")));
     }
 
+    /**
+     * Checks for a valid configuration
+     * @param modules - set of Strings the potentially represent moduls
+     * @return - Set of Strings that are valid configurations
+     */
     public static Set<String> validateModuleConfig(Set<String> modules) {
         Pattern pattern = Pattern.compile("module \\S+");
         for (String moduleName : modules) {
@@ -148,10 +154,9 @@ public final class MatildaAccessControl {
      * @see #callingClassModule() for reference how the caller module is identified
      */
     private boolean checkSystemExit() {
-        var callingClass = callingClassModule();
-        // TODO message should say module and should reflect that we are checking. also include the return value of the permission checking
-        logger.log(Level.FINE, "Class that initially called the method " + callingClass.toString());
-        return this.systemExitAllowPermissions.contains(callingClass.toString());
+        var callingModule = callingClassModule();
+        logger.log(Level.FINE, "Module that initially called the method {0} ", callingModule);
+        return this.systemExitAllowPermissions.contains(callingModule.toString());
     }
 
     /**
@@ -160,10 +165,9 @@ public final class MatildaAccessControl {
      *@see #callingClassModule() for reference how the caller module is identified
      */
     private boolean checkSystemExec() {
-        var callingClass = callingClassModule();
-        // TODO message should say module and should reflect that we are checking. also include the return value of the permission checking
-        logger.log(Level.FINE, "Class that initially called the method " + callingClass.toString());
-        return this.systemExecAllowPermissions.contains(callingClass.toString());
+        var callingModule = callingClassModule();
+        logger.log(Level.FINE, "Module that initially called the method {0} ", callingModule);
+        return this.systemExecAllowPermissions.contains(callingModule.toString());
     }
 
 
@@ -174,7 +178,6 @@ public final class MatildaAccessControl {
      */
     private boolean checkSocketPermission() {
         var callingModule = callingClassModule();
-        // TODO message should say module and should reflect that we are checking. also include the return value of the permission checking
         logger.log(Level.FINE, "Module that initially called the method {0} ", callingModule);
         return this.networkConnectAllowPermissions.contains(callingModule.toString());
     }

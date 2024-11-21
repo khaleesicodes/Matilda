@@ -20,12 +20,35 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+/**
+ * Object that mock the invocation of methods or initialization of Objects for testing purposes
+ */
 public final class Caller {
+
+    /**
+     * Mocks invocation of a method and return object accordingly
+     * @param inst - Object of method
+     * @param method - that should be invoked
+     * @param args - method argument
+     * @return - results of invoking the method with the given object
+     * @throws InvocationTargetException - if the underlying method throws an exception.
+     * @throws IllegalAccessException - if Method object is enforcing Java language access control and the underlying method is inaccessible.
+     */
 
     public static Object call(Object inst, Method method, Object... args) throws InvocationTargetException, IllegalAccessException {
         return method.invoke(inst, args);
     }
 
+    /**
+     * Mocks initialization of an Object
+     * @param constructor - that should be called
+     * @param args - parameter of constructor
+     * @return - Initialized Object
+     * @param <T> - Generic Typ in order to adapt to initialized Object
+     * @throws InvocationTargetException - if the underlying constructor throws an exception.
+     * @throws IllegalAccessException - if this Constructor object is enforcing Java language access control and the underlying constructor is inaccessible.
+     * @throws InstantiationException - if the class that declares the underlying constructor represents an abstract class.
+     */
     public static <T> T call(Constructor<T> constructor, Object... args) throws InvocationTargetException, IllegalAccessException, InstantiationException {
         return constructor.newInstance(args);
     }

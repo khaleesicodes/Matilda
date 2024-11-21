@@ -32,11 +32,10 @@ public class NetworkSocketTransformer implements MatildaCodeTransformer{
     private final AtomicBoolean hasRun = new AtomicBoolean(false);
 
     /**
-     * Transforms a class that test positive for the TransformPredicate*
+     * Transforms a class that test positive for the TransformPredicate
      */
     @Override
     public CodeTransform getTransform() {
-        //TODO Check why tranform doesn't work for url connect
         return (codeBuilder, codeElement) -> {
             if (!hasRun.getAndSet(true)) { // this must only be run / added once on top of the method
                 var accessControl = ClassDesc.of("org.matilda.bootstrap.MatildaAccessControl");
@@ -53,23 +52,25 @@ public class NetworkSocketTransformer implements MatildaCodeTransformer{
     }
 
     /**
-     * Matches CodeElement (Instruction) against elements specific to the java.net.Socket connect() and returns true accordingly
-     * A CodeModel describes a Code attribute; we can iterate over its CodeElements and handle those that
-     * include symbolic references to other types (JEP466)
+     * Matches MethodeElement against characteristics specific to the java.net.Socket connect() and returns true accordingly
+     * MethoModel models a method and can be traversed with a stream
      *
-     * @return Predicate - Holds structure of class that should be transformed
-     *  Uses the invokeinstruction of current codeElement, as we are looking for a method that is invoked virtual we check
-     * for INVOKEVIRTUAL
+     * @return Predicate - Holds structure of method that should be transformed
+     * Gets the method owner/ class method is an elemt of
      * as we are looking for methods owned by "java/lang/ProcessBuilder" we check for the owner
-     * check if method that is called is the start method
+     * check if method that is called is the connect method
      * check if method has the correct method descriptor
      */
     @Override
     public Predicate<MethodModel> getModelPredicate() {
         return methodElements -> {
+            // Get class method is an element of
             String internalName = methodElements.parent().get().thisClass().asInternalName();
+            // Check if its parent is the Socket Class
             return internalName.equals("java/net/Socket")
+                    // Matches Methode
                     && "connect".equals(methodElements.methodName().stringValue())
+                    // Matches Method Type
                     && "(Ljava/net/SocketAddress;)V".equals(methodElements.methodType().stringValue());
         };
     }
