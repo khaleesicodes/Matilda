@@ -38,6 +38,36 @@ class MatildaAccessControlTest {
     }
 
     @Test
+    void testMaleFormedPropertyKey() {
+        Properties props = new Properties();
+        props.setProperty("matilda.system.foo.allow", "module org.junit.platform.commons");
+        RuntimeException uOE = Assertions.assertThrows(RuntimeException.class, () -> {
+            MatildaAccessControl accessControl = new MatildaAccessControl(props);
+        });
+        Assertions.assertEquals("matilda.system.foo.allow is not a valid key. Allowed keys are: matilda.system.exit.allow, matilda.system.exec.allow,matilda.network.connect.allow", uOE.getMessage());
+    }
+
+    @Test
+    void testMaleFormedPropertyValue() {
+        Properties props = new Properties();
+        props.setProperty("matilda.system.exec.allow", "module org junit.platform.commons");
+        RuntimeException uOE = Assertions.assertThrows(RuntimeException.class, () -> {
+            MatildaAccessControl accessControl = new MatildaAccessControl(props);
+        });
+        Assertions.assertEquals("Not a valid module name: module org junit.platform.commons", uOE.getMessage());
+    }
+
+    @Test
+    void testMaleFormedPropertyValueSpelling() {
+        Properties props = new Properties();
+        props.setProperty("matilda.system.exec.allow", "m0dule org junit.platform.commons");
+        RuntimeException uOE = Assertions.assertThrows(RuntimeException.class, () -> {
+            MatildaAccessControl accessControl = new MatildaAccessControl(props);
+        });
+        Assertions.assertEquals("Not a valid module name: m0dule org junit.platform.commons", uOE.getMessage());
+    }
+
+    @Test
     void testSystemExitDenied() {
         Properties props = new Properties();
         MatildaAccessControl accessControl = new MatildaAccessControl(props);

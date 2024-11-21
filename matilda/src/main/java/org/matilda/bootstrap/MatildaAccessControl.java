@@ -22,6 +22,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 /**
@@ -61,15 +63,46 @@ public final class MatildaAccessControl {
      */
     // public only for testing
     public MatildaAccessControl(Properties properties) {
-        // TODO iterate over all the keys and see if there is any of them that we don't know that starts with matilda
-        // if so throw an exception -- also write a test for it
+        // validates syntax correctness of property configuration
+        for(Object elem:properties.keySet()){
+            if(elem instanceof String){
+                String key = elem.toString();
+                if (key.startsWith("matilda.")){
+                    switch (key){
+                        case "matilda.system.exit.allow":
+                        case "matilda.system.exec.allow":
+                        case "matilda.network.connect.allow":
+                        case "matilda.bootstrap.jar":
+                            break;
+                        default: throw new IllegalArgumentException(elem + " is not a valid key. Allowed keys are: matilda.system.exit.allow, matilda.system.exec.allow,matilda.network.connect.allow");
+                    }
+                }
+            }
+
+        }
         String systemExistAllow = properties.getProperty("matilda.system.exit.allow", "");
         String systemExecAllow = properties.getProperty("matilda.system.exec.allow", "");
         String networkConnectAllow = properties.getProperty("matilda.network.connect.allow", "");
-        this.systemExitAllowPermissions = Set.of(systemExistAllow.split(","));
-        this.systemExecAllowPermissions = Set.of(systemExecAllow.split(","));
-        this.networkConnectAllowPermissions = Set.of(networkConnectAllow.split(","));
+
+        this.systemExitAllowPermissions = validateModuleConfig(
+                systemExistAllow.isEmpty()? Set.of() : Set.of(systemExistAllow.split(",")));
+        this.systemExecAllowPermissions = validateModuleConfig(
+                systemExecAllow.isEmpty()? Set.of() : Set.of(systemExecAllow.split(",")));
+        this.networkConnectAllowPermissions = validateModuleConfig(
+                networkConnectAllow.isEmpty() ? Set.of() : Set.of(networkConnectAllow.split(",")));
     }
+
+    public static Set<String> validateModuleConfig(Set<String> modules) {
+        Pattern pattern = Pattern.compile("module \\S+");
+        for (String moduleName : modules) {
+            Matcher matcher = pattern.matcher(moduleName);
+            if (!matcher.matches()){
+                throw new IllegalArgumentException("Not a valid module name: " + moduleName);
+            }
+        }
+        return modules;
+    }
+
 
 
     /**
