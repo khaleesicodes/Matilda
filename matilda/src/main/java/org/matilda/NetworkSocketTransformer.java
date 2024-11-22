@@ -53,7 +53,7 @@ public class NetworkSocketTransformer implements MatildaCodeTransformer{
 
     /**
      * Matches MethodeElement against characteristics specific to the java.net.Socket connect() and returns true accordingly
-     * MethoModel models a method and can be traversed with a stream
+     * MethodModel models a method and can be traversed with a stream
      *
      * @return Predicate - Holds structure of method that should be transformed
      * Gets the method owner/ class method is an elemt of

@@ -39,6 +39,7 @@ public final class MatildaAccessControl {
     // TODO: it would be nice if the configuration would not require the module prefix
     // TODO: replace the Allowed modules with a simple check for "java.base"
     // TODO: Fix, potential circular dependency
+    // List of System.class Modules, only Modules that are of interest
     private static final Set<Module> ALLOWED_MODULES = Set.of(System.class.getModule());
     private static final MatildaAccessControl INSTANCE = new MatildaAccessControl(System.getProperties());
     private final Set<String> systemExitAllowPermissions;

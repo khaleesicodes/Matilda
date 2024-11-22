@@ -110,7 +110,6 @@ public final class AgentMatilda {
         inst.appendToBootstrapClassLoaderSearch(bootstrapJar);
     }
 
-    //TODO merge methods
     /**
      * Performs the actual transformation of a method / class with the provided {@link }MatildaCodeTransformer}
      * @param transformer - Transformer that should be used to perform the transformation

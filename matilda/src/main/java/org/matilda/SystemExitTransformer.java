@@ -32,7 +32,7 @@ public class SystemExitTransformer implements MatildaCodeTransformer {
 
     private final AtomicBoolean hasRun = new AtomicBoolean(false);
     /**
-     * Transforms a class that test positive for the TransformPredicate*
+     * Transforms a class that test positive for the TransformPredicate
      */
     @Override
     public CodeTransform getTransform() {
