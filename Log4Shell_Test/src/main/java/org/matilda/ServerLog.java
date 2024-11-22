@@ -79,7 +79,6 @@ public class ServerLog {
         logger.error("${jndi:ldap://127.0.0.1:" + port +"/matilda-poc}");
         // checks if any execution of connection has been done by the Logger - indicater for exploitation of Log4Shell
         Assertions.assertFalse(hasRead.get(), "LogForShell was not blocked by matilda");
-
         logger.error("Matilda has successfully blocked log4shell");
         // close the server socket and wait for the thread to die
         try {
