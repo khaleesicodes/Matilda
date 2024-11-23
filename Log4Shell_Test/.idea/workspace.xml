@@ -5,10 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d72e4b3a-fd1d-4e22-af64-55feef8d2383" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/matilda/ServerLog.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/matilda/ServerLog.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -168,7 +165,7 @@
       <workItem from="1731489818913" duration="619000" />
       <workItem from="1731919025039" duration="21256000" />
       <workItem from="1732126594456" duration="4473000" />
-      <workItem from="1732289422822" duration="1293000" />
+      <workItem from="1732289422822" duration="3586000" />
     </task>
     <servers />
   </component>
