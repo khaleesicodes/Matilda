@@ -220,5 +220,4 @@ public final class MatildaAccessControl {
                 );
         return module.orElse(null);
     }
-
 }

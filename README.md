@@ -19,12 +19,12 @@ Enable preview features when using JDK 23 in order to be able to use the Class-F
 ```
 Hook the MatildaAgent into your application
 ```bash
--javaagent:${project.rootDir}/build/libs/matilda-agent-1.0-SNAPSHOT.jar
+-javaagent:/path/to/matilda-agent-1.0-SNAPSHOT.jar
 ```
 
 Add the MatildaAcceControl to the bootpath. This is needed due to the class loading hirachy. Classes manipulated by the MatildaAgent reference to the MatildaAccessControl.
 ```bash
--Dmatilda.bootstrap.jar=${project.rootDir}/build/libs/matilda-bootstrap-1.0-SNAPSHOT.jar"
+-Dmatilda.bootstrap.jar=/path/to/matilda-bootstrap-1.0-SNAPSHOT.jar"
 ```
 Note that Matilda works with a whitelisting approach. With enabling the MatildaAgent, all calls to the above mentioned methods will be blocked by default.
 
@@ -36,9 +36,9 @@ Matilda comes with a module-based whitelisting approach, permission can be set p
 
 Configuration can also be done via the CLI or build file following the naming scheme:
 ```bash
--Dmatilda.runtime.exit.allow=module /<insert module name here/>
--Dmatilda.system.exec.allow=module /<insert module name here/>
--Dmatilda.network.connect.allow=module /<insert module name here/>
+-Dmatilda.runtime.exit.allow=module <insert module name here>
+-Dmatilda.system.exec.allow=module <insert module name here>
+-Dmatilda.network.connect.allow=module <insert module name here>
 ```
 
 
@@ -56,3 +56,9 @@ To test the exploitable version run the following gradle command. The build shou
 gradle runNoAgent
 ```
 
+## Configuration Example - tomcat
+In order to run apache tomcat with Matilda just export CATALINA_OPTS with the following configuration.
+
+```bash
+export CATALINA_OPTS="--enable-preview -javaagent:./path/matilda-agent-1.0-SNAPSHOT.jar -Dmatilda.bootstrap.jar=./path/matilda-bootstrap-1.0-SNAPSHOT.jar"
+```
