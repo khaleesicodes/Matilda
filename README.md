@@ -13,7 +13,7 @@ Currently Matilda only supports JDK Version 23 or Higher as it heavily uses the[
 Matilda can be used via the CLI or by configuring the projects build file accordingly. 
 
 ## CLI Quickstart
-Enable preview features when using JDK 23 in order to be able to use the Class-File API
+Matilda uses the ClassFile API which is a preview feature in JDK 23, in order to run your application with Matilda you need to enable preview.
 ```bash
 --enable-preview
 ```
