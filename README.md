@@ -6,7 +6,7 @@ Matilda provides sandboxing capabilities at runtime for the JVM. It is a lightwe
 Matilda 
 
 ## Installation
-Currently Matilda only supports JDK Version 23 or Higher as it heavily uses the[Class File API](https://docs.oracle.com/en/java/javase/23/vm/class-file-api.html). To use Matilda download the MatildaAgent.jar and the MatildaBootstrap.jar from the repository.
+Matilda uses the [Class File API](https://docs.oracle.com/en/java/javase/23/vm/class-file-api.html) which is a preview feature in JDK 23, in order to run your application with Matilda you need to enable preview.. To use Matilda download the MatildaAgent.jar and the MatildaBootstrap.jar from the repository.
 
 
 # Usage
