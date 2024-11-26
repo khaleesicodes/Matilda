@@ -45,7 +45,7 @@ public class AgentMatildaTest {
             System.exit(-1);
             Assertions.fail("should not have been able to exit the process");
         });
-        Assertions.assertEquals("Runtime.exit not allowed", uOE.getMessage());
+        Assertions.assertEquals("Runtime.exit not allowed for Module: matilda.test", uOE.getMessage());
 
         // Tests if matilda also protects against the use of reflections
         uOE = Assertions.assertThrows(RuntimeException.class, () -> {
@@ -58,7 +58,7 @@ public class AgentMatildaTest {
             }
             Assertions.fail("should not have been able to exit the process");
         });
-        Assertions.assertEquals("Runtime.exit not allowed", uOE.getMessage());
+        Assertions.assertEquals("Runtime.exit not allowed for Module: matilda.test", uOE.getMessage());
     }
 
     @Test
@@ -67,7 +67,7 @@ public class AgentMatildaTest {
             Runtime.getRuntime().exec("echo");
             Assertions.fail("should not have been able to run a process");
         });
-        Assertions.assertEquals("ProceesBuilder.start(...) not allowed", uOE.getMessage());
+        Assertions.assertEquals("ProceesBuilder.start(...) not allowed for Module: matilda.test", uOE.getMessage());
 
         Class<?> aClass = Class.forName("java.lang.Runtime");
         Method exec = aClass.getMethod("exec", String.class);
@@ -88,7 +88,7 @@ public class AgentMatildaTest {
             Socket socket = new Socket("localhost", 9999);
             Assertions.fail("should not have been able to open a connection");
         });
-        Assertions.assertEquals("Socket.connect not allowed", exception.getMessage());
+        Assertions.assertEquals("Socket.connect not allowed for Module: matilda.test", exception.getMessage());
     }
 
     /**
@@ -162,7 +162,7 @@ public class AgentMatildaTest {
             InputStream response = connection.getInputStream();
             Assertions.fail("should not have been able to open a connection");
         });
-        Assertions.assertEquals("Socket.connect not allowed", exception_url.getMessage());
+        Assertions.assertEquals("Socket.connect not allowed for Module: matilda.test", exception_url.getMessage());
     }
 
 

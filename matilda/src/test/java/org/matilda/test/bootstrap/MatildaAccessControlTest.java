@@ -51,7 +51,7 @@ class MatildaAccessControlTest {
             accessControl.checkPermissionInternal("ProcessBuilder.start");
             Assertions.fail("should not have been able to exit the process");
         });
-        Assertions.assertEquals("ProceesBuilder.start(...) not allowed", uOE.getMessage());
+        Assertions.assertEquals("ProceesBuilder.start(...) not allowed for Module: org.junit.jupiter.api", uOE.getMessage());
 
     }
 
@@ -78,7 +78,7 @@ class MatildaAccessControlTest {
             Assertions.fail("should not have been able to run a process");
 
         });
-        Assertions.assertEquals("ProceesBuilder.start(...) not allowed", uOE.getMessage());
+        Assertions.assertEquals("ProceesBuilder.start(...) not allowed for Module: org.junit.jupiter.api", uOE.getMessage());
     }
 
     /**
@@ -103,7 +103,7 @@ class MatildaAccessControlTest {
             accessControl.checkPermissionInternal("Socket.connect");
             Assertions.fail("should not have been able to open a connection");
         });
-        Assertions.assertEquals("Socket.connect not allowed", exception.getMessage());
+        Assertions.assertEquals("Socket.connect not allowed for Module: org.junit.jupiter.api", exception.getMessage());
 
     }
 

@@ -128,20 +128,21 @@ public final class MatildaAccessControl {
      */
     // should be private
     public void checkPermissionInternal(String method) {
+        var callingModule = callingClassModule();
         switch (method) {
             case "Runtime.exit":
-                if (!checkSystemExit()) {
-                    throw new RuntimeException("Runtime.exit not allowed");
+                if (!checkSystemExit(callingModule)) {
+                    throw new RuntimeException("Runtime.exit not allowed for Module: " +  callingModule.getName());
                 }
                 else return;
             case "ProcessBuilder.start":
-                if (!checkSystemExec()) {
-                    throw new RuntimeException("ProceesBuilder.start(...) not allowed");
+                if (!checkSystemExec(callingModule)) {
+                    throw new RuntimeException("ProceesBuilder.start(...) not allowed for Module: " +  callingModule.getName());
                 }
                 else return;
             case "Socket.connect":
-                if (!checkSocketPermission()) {
-                    throw new RuntimeException("Socket.connect not allowed");
+                if (!checkSocketPermission(callingModule)) {
+                    throw new RuntimeException("Socket.connect not allowed for Module: " +  callingModule.getName());
                 }
                 else return;
             default:
@@ -154,8 +155,7 @@ public final class MatildaAccessControl {
      * @return boolean - true iff caller module has the right permissions otherwise false
      * @see #callingClassModule() for reference how the caller module is identified
      */
-    private boolean checkSystemExit() {
-        var callingModule = callingClassModule();
+    private boolean checkSystemExit(Module callingModule) {
         logger.log(Level.FINE, "Module that initially called the method {0} ", callingModule);
         return this.systemExitAllowPermissions.contains(callingModule.toString());
     }
@@ -165,8 +165,7 @@ public final class MatildaAccessControl {
      *@return boolean - true iff caller module has the right permissions otherwise false
      *@see #callingClassModule() for reference how the caller module is identified
      */
-    private boolean checkSystemExec() {
-        var callingModule = callingClassModule();
+    private boolean checkSystemExec(Module callingModule) {
         logger.log(Level.FINE, "Module that initially called the method {0} ", callingModule);
         return this.systemExecAllowPermissions.contains(callingModule.toString());
     }
@@ -177,8 +176,7 @@ public final class MatildaAccessControl {
      *@return boolean - true iff caller module has the right permissions otherwise false
      *@see #callingClassModule() for reference how the caller module is identified
      */
-    private boolean checkSocketPermission() {
-        var callingModule = callingClassModule();
+    private boolean checkSocketPermission(Module callingModule) {
         logger.log(Level.FINE, "Module that initially called the method {0} ", callingModule);
         return this.networkConnectAllowPermissions.contains(callingModule.toString());
     }
@@ -191,7 +189,6 @@ public final class MatildaAccessControl {
     private Module callingClassModule() {
         final int framesToSkip =
                 1  // getCallingClass (this method)
-                + 1  // the checkXxx method
                 + 1  // Instantiation
                 + 1  // the runtime config method
                 + 1  // the instrumented method
