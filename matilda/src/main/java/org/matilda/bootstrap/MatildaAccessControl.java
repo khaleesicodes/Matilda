@@ -182,16 +182,16 @@ public final class MatildaAccessControl {
     }
 
     /**
-     * In order to identify the caller skipframes of the helper methods as well as the called method needs to be skipped
-     * needs to be adapted if structure of the AccessContoller changes
+     * In order to identify the caller skip frames of the helper methods as well as the called method needs to be skipped
+     * needs to be adapted if structure of the AccessController changes
      * @return Module - Returns module that initially called method
      */
     private Module callingClassModule() {
         final int framesToSkip =
-                1  // getCallingClass (this method)
-                + 1  // Instantiation
-                + 1  // the runtime config method
-                + 1  // the instrumented method
+                1  // MatildaAccessControl.callingClass
+                + 1  // MatildaAccessControl.checkPermissionInternal
+                + 1  // MatildaAccessControl.checkPermission
+                + 1  // the instrumented method ie. Runtime.exit / exec etc.
                 ;
         return callingClass(framesToSkip);
     }
