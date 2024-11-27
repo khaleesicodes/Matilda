@@ -69,10 +69,27 @@ public class AgentMatildaTest {
         });
         Assertions.assertEquals("ProceesBuilder.start(...) not allowed for Module: matilda.test", uOE.getMessage());
 
-        Class<?> aClass = Class.forName("java.lang.Runtime");
-        Method exec = aClass.getMethod("exec", String.class);
 
         // Tests if matilda also protects against the use of reflections
+        uOE = Assertions.assertThrows(RuntimeException.class, () -> {
+            Class<?> aClass = Class.forName("java.lang.Runtime");
+            Method exec = aClass.getMethod("exec", String.class);
+            try {
+                exec.invoke(Runtime.getRuntime(), "echo");
+            } catch (InvocationTargetException e) {
+                throw e.getCause();
+            }
+            Assertions.fail("should not have been able to run a process");
+        });
+        Assertions.assertEquals("ProceesBuilder.start(...) not allowed for Module: matilda.test", uOE.getMessage());
+
+    }
+
+    // Negative case, test if method call is not blocked
+    @Test
+    public void testSystemExecTransformerNegative() throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, IOException, InterruptedException {
+        Class<?> aClass = Class.forName("java.lang.Runtime");
+        Method exec = aClass.getMethod("exec", String.class);
         Process echo = (Process) Caller.call(Runtime.getRuntime(), exec, "echo foo");
         echo.waitFor(3, TimeUnit.SECONDS);
         Assertions.assertEquals(0, echo.exitValue());
@@ -89,6 +106,20 @@ public class AgentMatildaTest {
             Assertions.fail("should not have been able to open a connection");
         });
         Assertions.assertEquals("Socket.connect not allowed for Module: matilda.test", exception.getMessage());
+
+        // Tests if matilda also protects against the use of reflections
+        RuntimeException uOE = Assertions.assertThrows(RuntimeException.class, () -> {
+            Class<?> aClass = Class.forName("java.net.Socket");
+            var ctor = aClass.getConstructor(String.class, int.class);
+            try {
+                ctor.newInstance("localhost", 9999);
+            } catch (InvocationTargetException e) {
+                throw e.getCause();
+            }
+            Assertions.fail("should not have been able to open a connection");
+        });
+        Assertions.assertEquals("Socket.connect not allowed for Module: matilda.test", uOE.getMessage());
+
     }
 
     /**
