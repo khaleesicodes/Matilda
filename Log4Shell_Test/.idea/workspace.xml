@@ -4,11 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d72e4b3a-fd1d-4e22-af64-55feef8d2383" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../matilda/src/test/java/org/matilda/test/AgentMatildaTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/../matilda/src/test/java/org/matilda/test/AgentMatildaTest.java" afterDir="false" />
-    </list>
+    <list default="true" id="d72e4b3a-fd1d-4e22-af64-55feef8d2383" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -169,6 +165,7 @@
       <workItem from="1732126594456" duration="4473000" />
       <workItem from="1732289422822" duration="3586000" />
       <workItem from="1732723425469" duration="818000" />
+      <workItem from="1732790058804" duration="88000" />
     </task>
     <servers />
   </component>
