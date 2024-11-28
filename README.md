@@ -32,7 +32,7 @@ For gradle examples refer to the [Log4Shell example](https://github.com/khaleesi
 
 
 ## Configuration
-Matilda comes with a module-based whitelisting approach, permission can be set per module and are enforced accordingly. If your projects does not use modules consider to change it, it is not only needed to use Matilda but also recommenede by the [Secure Coding Guidelines for Java SE](https://www.oracle.com/java/technologies/javase/seccodeguide.html)
+Matilda comes with a module-based whitelisting approach, permission can be set per module and are enforced accordingly. If your projects does not use modules consider to change it, it is not only needed to use Matilda but also recommenede by the [Secure Coding Guidelines for Java SE](https://www.oracle.com/java/technologies/javase/seccodeguide.html). If you want to understand what modules are and aren't better read this [Blogpost](https://inside.java/2021/09/10/what-are-modules-about/) by Ron Pressler.
 
 Configuration can also be done via the CLI or build file following the naming scheme:
 ```bash
