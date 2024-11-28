@@ -132,22 +132,26 @@ public final class MatildaAccessControl {
         switch (method) {
             case "Runtime.exit":
                 if (!checkSystemExit(callingModule)) {
-                    throw new RuntimeException("Runtime.exit not allowed for Module: " +  callingModule.getName());
+                    throw new RuntimeException("Runtime.exit not allowed for Module: " +  getModuleName(callingModule));
                 }
                 else return;
             case "ProcessBuilder.start":
                 if (!checkSystemExec(callingModule)) {
-                    throw new RuntimeException("ProceesBuilder.start(...) not allowed for Module: " +  callingModule.getName());
+                    throw new RuntimeException("ProceesBuilder.start(...) not allowed for Module: " +  getModuleName(callingModule));
                 }
                 else return;
             case "Socket.connect":
                 if (!checkSocketPermission(callingModule)) {
-                    throw new RuntimeException("Socket.connect not allowed for Module: " +  callingModule.getName());
+                    throw new RuntimeException("Socket.connect not allowed for Module: " +  getModuleName(callingModule));
                 }
                 else return;
             default:
                 throw new IllegalArgumentException("Unknown method: " + method);
         }
+    }
+
+    private String getModuleName(Module module) {
+        return module.isNamed() ? module.getName() : "unnamed module";
     }
 
     /**
