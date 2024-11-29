@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.lucene.tests.mockfile;
+package org.matilda.filesystem;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,20 +28,19 @@ import java.nio.file.WatchEvent.Modifier;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.util.Iterator;
-import org.apache.lucene.util.SuppressForbidden;
-import org.apache.lucene.util.Unwrappable;
+
 
 /**
  * A {@code FilterPath} contains another {@code Path}, which it uses as its basic source of data,
  * possibly transforming the data along the way or providing additional functionality.
  */
-public class FilterPath implements Path, Unwrappable<Path> {
+public class MatildaPath implements Path {
 
   /** The underlying {@code Path} instance. */
   protected final Path delegate;
 
   /** The parent {@code FileSystem} for this path. */
-  protected final FilterFileSystem fileSystem;
+  protected final MatildaFileSystem fileSystem;
 
   /**
    * Construct a {@code FilterPath} with parent {@code fileSystem}, based on the specified base
@@ -50,7 +49,7 @@ public class FilterPath implements Path, Unwrappable<Path> {
    * @param delegate specified base path.
    * @param fileSystem parent fileSystem.
    */
-  public FilterPath(Path delegate, FilterFileSystem fileSystem) {
+  public MatildaPath(Path delegate, MatildaFileSystem fileSystem) {
     this.delegate = delegate;
     this.fileSystem = fileSystem;
   }
@@ -64,10 +63,6 @@ public class FilterPath implements Path, Unwrappable<Path> {
     return delegate;
   }
 
-  @Override
-  public Path unwrap() {
-    return delegate;
-  }
 
   @Override
   public FileSystem getFileSystem() {
@@ -195,7 +190,6 @@ public class FilterPath implements Path, Unwrappable<Path> {
   }
 
   @Override
-  @SuppressForbidden(reason = "Abstract API requires to use java.io.File")
   public File toFile() {
     // TODO: should we throw exception here?
     return delegate.toFile();
@@ -248,7 +242,7 @@ public class FilterPath implements Path, Unwrappable<Path> {
     if (this == obj) return true;
     if (obj == null) return false;
     if (getClass() != obj.getClass()) return false;
-    FilterPath other = (FilterPath) obj;
+    MatildaPath other = (MatildaPath) obj;
     if (delegate == null) {
       if (other.delegate != null) return false;
     } else if (!delegate.equals(other.delegate)) return false;
@@ -262,13 +256,8 @@ public class FilterPath implements Path, Unwrappable<Path> {
    * Unwraps all {@code FilterPath}s, returning the innermost {@code Path}.
    *
    * <p>WARNING: this is exposed for testing only!
-   *
-   * @param path specified path.
    * @return innermost Path instance
    */
-  public static Path unwrap(Path path) {
-    return Unwrappable.unwrapAll(path);
-  }
 
   protected final Path wrap(Path other) {
     return fileSystem.parent.wrapPath(other);
@@ -276,8 +265,8 @@ public class FilterPath implements Path, Unwrappable<Path> {
 
   /** Override this to customize the unboxing of Path from various operations */
   protected Path toDelegate(Path path) {
-    if (path instanceof FilterPath) {
-      FilterPath fp = (FilterPath) path;
+    if (path instanceof MatildaPath) {
+      MatildaPath fp = (MatildaPath) path;
       if (fp.fileSystem != fileSystem) {
         throw new ProviderMismatchException(
             "mismatch, expected: "

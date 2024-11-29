@@ -148,8 +148,8 @@ public class MatildaFileSystem extends FileSystem {
   public PathMatcher getPathMatcher(String syntaxAndPattern) {
     final PathMatcher matcher = delegate.getPathMatcher(syntaxAndPattern);
     return path -> {
-      if (path instanceof FilterPath) {
-        return matcher.matches(((FilterPath) path).delegate);
+      if (path instanceof MatildaPath) {
+        return matcher.matches(((MatildaPath) path).delegate);
       }
       return false;
     };

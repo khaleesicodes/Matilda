@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.lucene.tests.mockfile;
+package org.matilda.filesystem;
 
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
@@ -27,13 +27,13 @@ import java.util.Objects;
  * basic source of data, possibly transforming the data along the way or providing additional
  * functionality.
  */
-public class FilterDirectoryStream implements DirectoryStream<Path> {
+public class MatildaDirectoryStream implements DirectoryStream<Path> {
 
   /** The underlying {@code DirectoryStream} instance. */
   protected final DirectoryStream<Path> delegate;
 
   /** The underlying {@code FileSystem} instance. */
-  protected final FilterFileSystem fileSystem;
+  protected final MatildaFileSystem fileSystem;
 
   /**
    * Construct a {@code FilterDirectoryStream} based on the specified base stream.
@@ -42,7 +42,7 @@ public class FilterDirectoryStream implements DirectoryStream<Path> {
    *
    * @param delegate specified base stream.
    */
-  public FilterDirectoryStream(DirectoryStream<Path> delegate, FilterFileSystem fileSystem) {
+  public MatildaDirectoryStream(DirectoryStream<Path> delegate, MatildaFileSystem fileSystem) {
     this.delegate = Objects.requireNonNull(delegate);
     this.fileSystem = Objects.requireNonNull(fileSystem);
   }

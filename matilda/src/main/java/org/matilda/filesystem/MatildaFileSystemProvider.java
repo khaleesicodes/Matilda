@@ -122,8 +122,8 @@ public abstract class MatildaFileSystemProvider extends FileSystemProvider {
   }
 
   /** wraps a Path with provider-specific behavior */
-  public FilterPath wrapPath(Path path) {
-    return new FilterPath(path, fileSystem);
+  public MatildaPath wrapPath(Path path) {
+    return new MatildaPath(path, fileSystem);
   }
 
   @Override
@@ -133,26 +133,31 @@ public abstract class MatildaFileSystemProvider extends FileSystemProvider {
 
   @Override
   public void delete(Path path) throws IOException {
+    //TODO insert check
     delegate.delete(toDelegate(path));
   }
 
   @Override
   public void copy(Path source, Path target, CopyOption... options) throws IOException {
+    //TODO insert check
     delegate.copy(toDelegate(source), toDelegate(target), options);
   }
 
   @Override
   public void move(Path source, Path target, CopyOption... options) throws IOException {
+    //TODO insert check
     delegate.move(toDelegate(source), toDelegate(target), options);
   }
 
   @Override
   public boolean isSameFile(Path path, Path path2) throws IOException {
+    //TODO insert check
     return delegate.isSameFile(toDelegate(path), toDelegate(path2));
   }
 
   @Override
   public boolean isHidden(Path path) throws IOException {
+    //TODO insert check
     return delegate.isHidden(toDelegate(path));
   }
 
@@ -163,6 +168,7 @@ public abstract class MatildaFileSystemProvider extends FileSystemProvider {
 
   @Override
   public void checkAccess(Path path, AccessMode... modes) throws IOException {
+    //TODO insert check
     delegate.checkAccess(toDelegate(path), modes);
   }
 
@@ -232,7 +238,7 @@ public abstract class MatildaFileSystemProvider extends FileSystemProvider {
             return filter.accept(wrapPath(entry));
           }
         };
-    return new FilterDirectoryStream(
+    return new MatildaDirectoryStream(
         delegate.newDirectoryStream(toDelegate(dir), wrappedFilter), fileSystem);
   }
 
@@ -258,8 +264,8 @@ public abstract class MatildaFileSystemProvider extends FileSystemProvider {
   }
 
   protected Path toDelegate(Path path) {
-    if (path instanceof FilterPath) {
-      FilterPath fp = (FilterPath) path;
+    if (path instanceof MatildaPath) {
+      MatildaPath fp = (MatildaPath) path;
       if (fp.fileSystem != fileSystem) {
         throw new ProviderMismatchException(
             "mismatch, expected: "
