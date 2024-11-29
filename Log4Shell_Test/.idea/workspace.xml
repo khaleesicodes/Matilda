@@ -4,14 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d72e4b3a-fd1d-4e22-af64-55feef8d2383" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/libs/matilda-bootstrap-0.1.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/matilda-agent-1.0-SNAPSHOT.jar" beforeDir="false" afterPath="$PROJECT_DIR$/libs/matilda-agent-0.1.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/matilda-bootstrap-1.0-SNAPSHOT.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../matilda/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/../matilda/build.gradle" afterDir="false" />
-    </list>
+    <list default="true" id="d72e4b3a-fd1d-4e22-af64-55feef8d2383" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
