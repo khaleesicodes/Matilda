@@ -19,12 +19,12 @@ Matilda uses the ClassFile API which is a preview feature in JDK 23, in order to
 ```
 Hook the MatildaAgent into your application
 ```bash
--javaagent:/path/to/matilda-agent-1.0-SNAPSHOT.jar
+-javaagent:/path/to/matilda-agent-<version>.jar
 ```
 
 Add the MatildaAcceControl to the bootpath. This is needed due to the class loading hirachy. Classes manipulated by the MatildaAgent reference to the MatildaAccessControl.
 ```bash
--Dmatilda.bootstrap.jar=/path/to/matilda-bootstrap-1.0-SNAPSHOT.jar"
+-Dmatilda.bootstrap.jar=/path/to/matilda-bootstrap-<version>.jar"
 ```
 Note that Matilda works with a whitelisting approach. With enabling the MatildaAgent, all calls to the above mentioned methods will be blocked by default.
 
@@ -60,5 +60,5 @@ gradle runNoAgent
 In order to run apache tomcat with Matilda just export CATALINA_OPTS with the following configuration.
 
 ```bash
-export CATALINA_OPTS="--enable-preview -javaagent:./path/matilda-agent-1.0-SNAPSHOT.jar -Dmatilda.bootstrap.jar=./path/matilda-bootstrap-1.0-SNAPSHOT.jar"
+export CATALINA_OPTS="--enable-preview -javaagent:./path/matilda-agent-<version>.jar -Dmatilda.bootstrap.jar=./path/matilda-bootstrap-<version>.jar"
 ```
