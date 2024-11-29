@@ -23,7 +23,7 @@ import java.lang.reflect.Method;
 /**
  * Object that mock the invocation of methods or initialization of Objects for testing purposes
  */
-public final class Caller {
+public final class ModuleProxy {
 
     /**
      * Mocks invocation of a method and return object accordingly

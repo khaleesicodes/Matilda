@@ -18,7 +18,7 @@ package org.matilda.test;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.matilda.bootstrap.Caller;
+import org.matilda.bootstrap.ModuleProxy;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -90,7 +90,7 @@ public class AgentMatildaTest {
     public void testSystemExecTransformerNegative() throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, IOException, InterruptedException {
         Class<?> aClass = Class.forName("java.lang.Runtime");
         Method exec = aClass.getMethod("exec", String.class);
-        Process echo = (Process) Caller.call(Runtime.getRuntime(), exec, "echo foo");
+        Process echo = (Process) ModuleProxy.call(Runtime.getRuntime(), exec, "echo foo");
         echo.waitFor(3, TimeUnit.SECONDS);
         Assertions.assertEquals(0, echo.exitValue());
         try (BufferedReader reader = new BufferedReader(new InputStreamReader( echo.getInputStream()))) {
@@ -170,7 +170,7 @@ public class AgentMatildaTest {
         // Get Constructor for Socket, this is needed in order to get a non transformed version of the Socket class
         Constructor<Socket> networkClassConstructor = networkClass.getConstructor(String.class, int.class);
 
-        try(Socket clientSocket = Caller.call(networkClassConstructor,"localhost", port)){
+        try(Socket clientSocket = ModuleProxy.call(networkClassConstructor,"localhost", port)){
             clientSocket.getOutputStream().write("Test connection".getBytes());
         };
         // checks if the clientSocket was able to connect to the server

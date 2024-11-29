@@ -23,15 +23,15 @@ plugins {
     id 'java'
 }
 group = 'org.matilda'
-version = '1.0-SNAPSHOT'
+version = '0.1-SNAPSHOT'
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    testImplementation platform('org.junit:junit-bom:5.10.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.9.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 // Configuration of Java compiler in order to run JDK with preview features
@@ -43,14 +43,14 @@ tasks.withType(JavaCompile).configureEach {
 // to be appended to the botstrap class path
 // TODO check for variable that updates jar version
 tasks.withType(Test).configureEach {
-    jvmArgs += ["--enable-preview","-javaagent:${project.rootDir}/build/libs/matilda-agent-1.0-SNAPSHOT.jar",
-                "-Dmatilda.bootstrap.jar=${project.rootDir}/build/libs/matilda-bootstrap-1.0-SNAPSHOT.jar"]
+    jvmArgs += ["--enable-preview","-javaagent:${project.rootDir}/build/libs/matilda-agent-${version}.jar",
+                "-Dmatilda.bootstrap.jar=${project.rootDir}/build/libs/matilda-bootstrap-${version}.jar"]
     enableAssertions = true
 }
 
 tasks.withType(JavaExec).configureEach {
-    jvmArgs += ["--enable-preview","-javaagent:${project.rootDir}/build/libs/matilda-agent-1.0-SNAPSHOT.jar",
-                "-Dmatilda.bootstrap.jar=${project.rootDir}/build/libs/matilda-bootstrap-1.0-SNAPSHOT.jar"]
+    jvmArgs += ["--enable-preview","-javaagent:${project.rootDir}/build/libs/matilda-agent-${version}.jar",
+                "-Dmatilda.bootstrap.jar=${project.rootDir}/build/libs/matilda-bootstrap-${version}.jar"]
 
 }
 
@@ -81,8 +81,8 @@ jar.dependsOn(agentJar, bootstrapJar)
 
 // Configuration for unit test, all JVMs need to be set properly in order for all test to work
 test {
-    jvmArgs += ["--enable-preview","-javaagent:${project.rootDir}/build/libs/matilda-agent-1.0-SNAPSHOT.jar",
-                "-Dmatilda.bootstrap.jar=${project.rootDir}/build/libs/matilda-bootstrap-1.0-SNAPSHOT.jar",
+    jvmArgs += ["--enable-preview","-javaagent:${project.rootDir}/build/libs/matilda-agent-${version}.jar",
+                "-Dmatilda.bootstrap.jar=${project.rootDir}/build/libs/matilda-bootstrap-${version}.jar",
                 // needs to be allowed so gradle worker can exit and negative Test cases work
                 "-Dmatilda.runtime.exit.allow=module gradle.worker", "-Dmatilda.system.exec.allow=module matilda.core", "-Dmatilda.network.connect.allow=module matilda.core"]
     useJUnitPlatform()

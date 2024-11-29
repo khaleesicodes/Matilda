@@ -150,6 +150,11 @@ public final class MatildaAccessControl {
         }
     }
 
+    /**
+     * Returns differntiated error message when an unnamed module appears
+     * @param module
+     * @return - Module name if module exist otherwise returns information of unnamed module
+     */
     private String getModuleName(Module module) {
         return module.isNamed() ? module.getName() : "unnamed module";
     }
