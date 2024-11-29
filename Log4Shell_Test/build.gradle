@@ -20,6 +20,7 @@ plugins {
 
 group = 'org.matilda'
 version = '1.0-SNAPSHOT'
+def agent_version = '0.1'
 
 repositories {
     mavenCentral()
@@ -30,8 +31,8 @@ task run(type: JavaExec) {
     group = "Execution"
     description = "Run the main class with MatildaAgent enabled"
     classpath = sourceSets.main.runtimeClasspath
-    jvmArgs += ["--enable-preview","-javaagent:${project.rootDir}/libs/matilda-agent-1.0-SNAPSHOT.jar",
-                "-Dmatilda.bootstrap.jar=${project.rootDir}/libs/matilda-bootstrap-1.0-SNAPSHOT.jar"]
+    jvmArgs += ["--enable-preview","-javaagent:${project.rootDir}/libs/matilda-agent-${agent_version}.jar",
+                "-Dmatilda.bootstrap.jar=${project.rootDir}/libs/matilda-bootstrap-${agent_version}.jar"]
     mainClass = "org.matilda.POC"
 }
 
@@ -44,8 +45,8 @@ task runNoAgent(type: JavaExec) {
 }
 
 dependencies {
-    implementation platform('org.junit:junit-bom:5.10.0')
-    implementation 'org.junit.jupiter:junit-jupiter'
+    implementation 'org.junit.jupiter:junit-jupiter:5.9.2'
+    implementation 'org.junit.platform:junit-platform-launcher'
     // Use vulnerable version of Log4J
     implementation platform('org.apache.logging.log4j:log4j-bom:2.14.1')
     implementation 'org.apache.logging.log4j:log4j-api:2.14.1'
