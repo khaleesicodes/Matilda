@@ -3,7 +3,7 @@
 
 # Matilda
 Matilda provides sandboxing capabilities at runtime for the JVM. It is a lightweight alternative to the soon to be deprecated Java Security Manager. You can granuallary block modules from executing System.exit(), System.exec() and Network connections like Socket.open.
-Matilda 
+
 
 ## Installation
 Matilda uses the [Class File API](https://docs.oracle.com/en/java/javase/23/vm/class-file-api.html) which is a preview feature in JDK 23, in order to run your application with Matilda you need to enable preview.. To use Matilda download the MatildaAgent.jar and the MatildaBootstrap.jar from the repository.
