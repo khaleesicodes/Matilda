@@ -19,6 +19,8 @@ package org.matilda;
 import module java.base;
 import module java.instrument;
 
+import java.util.logging.Logger;
+
 /**
  *
  * The matilda agent allows the attachment to the JVM, manipulating the bytecode of all classes
@@ -131,6 +133,8 @@ public final class AgentMatilda {
     static byte[] processClasses(byte[] classBytes, MatildaCodeTransformer transformer) {
         ClassFile cf = ClassFile.of(ClassFile.DebugElementsOption.DROP_DEBUG);
         ClassModel classModel = cf.parse(classBytes);
-        return cf.transform(classModel, transformClass(transformer));
+        byte[] transformedClass =  cf.transform(classModel, transformClass(transformer));
+        final Logger logger = Logger.getLogger(AgentMatilda.class.getName());
+        return transformedClass;
     }
 }

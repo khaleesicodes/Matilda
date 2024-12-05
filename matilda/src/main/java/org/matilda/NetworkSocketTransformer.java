@@ -40,6 +40,7 @@ public class NetworkSocketTransformer implements MatildaCodeTransformer{
             if (!hasRun.getAndSet(true)) { // this must only be run / added once on top of the method
                 var accessControl = ClassDesc.of("org.matilda.bootstrap.MatildaAccessControl");
                 var methodTypeDesc = MethodTypeDesc.ofDescriptor("(Ljava/lang/String;)V");
+
                 codeBuilder
                         // Needs to be hard coded in order to not run into classpath issues when using MatildaAccessControl, as it is not loaded yet
                         .ldc("Socket.connect")
@@ -47,9 +48,12 @@ public class NetworkSocketTransformer implements MatildaCodeTransformer{
                         .with(codeElement);
             } else {
                 codeBuilder.with(codeElement);
+                System.err.println(codeElement);
             }
         };
     }
+
+
 
     /**
      * Matches MethodeElement against characteristics specific to the java.net.Socket connect() and returns true accordingly
@@ -57,7 +61,7 @@ public class NetworkSocketTransformer implements MatildaCodeTransformer{
      *
      * @return Predicate - Holds structure of method that should be transformed
      * Gets the method owner/ class method is an elemt of
-     * as we are looking for methods owned by "java/lang/ProcessBuilder" we check for the owner
+     * as we are looking for methods owned by "java/net/Socket" we check for the owner
      * check if method that is called is the connect method
      * check if method has the correct method descriptor
      */

@@ -58,7 +58,7 @@ public class SystemExitTransformer implements MatildaCodeTransformer {
      *
      * @return Predicate - Holds structure of method that should be transformed
      * Gets the method owner/ class method is an element of
-     * as we are looking for methods owned by "java/lang/ProcessBuilder" we check for the owner
+     * as we are looking for methods owned by "java/lang/Runtime" we check for the owner
      * check if method that is called is the connect method
      * check if method has the correct method descriptor
      */
