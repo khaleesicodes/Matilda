@@ -196,5 +196,11 @@ public class AgentMatildaTest {
         Assertions.assertEquals("Socket.connect not allowed for Module: matilda.test", exception_url.getMessage());
     }
 
+    @Test
+    public void serverSocketTest() throws IOException {
+
+
+
+    }
 
 }

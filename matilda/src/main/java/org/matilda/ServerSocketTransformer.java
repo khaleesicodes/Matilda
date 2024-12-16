@@ -20,6 +20,9 @@ package org.matilda;
 
 import java.lang.classfile.CodeTransform;
 import java.lang.classfile.MethodModel;
+import java.lang.constant.ClassDesc;
+import java.lang.constant.MethodTypeDesc;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 
 /**
@@ -27,6 +30,7 @@ import java.util.function.Predicate;
  */
 
 public class ServerSocketTransformer implements MatildaCodeTransformer{
+    private final AtomicBoolean hasRun = new AtomicBoolean(false);
 
     /**
      * Matches MethodeElement against characteristics specific to the java.net.Socket connect() and returns true accordingly
@@ -38,16 +42,41 @@ public class ServerSocketTransformer implements MatildaCodeTransformer{
      * check if method that is called is the connect method
      * check if method has the correct method descriptor
      */
+
     @Override
     public Predicate<MethodModel> getModelPredicate() {
-        return null;
+        return methodElements -> {
+            // Get class method is an element of
+            String internalName = methodElements.parent().get().thisClass().asInternalName();
+            // Check if its parent is the ServerSocket Class
+            return internalName.equals("java/net/ServerSocket")
+                    // Matches Methode
+                    && "bind".equals(methodElements.methodName().stringValue())
+                    // Matches Method Type
+                    && "(Ljava/net/SocketAddress;)V".equals(methodElements.methodType().stringValue());
+        };
     }
+
 
     /**
      * Transforms a class that test positive for the TransformPredicate
      */
     @Override
     public CodeTransform getTransform() {
-        return null;
+        return (codeBuilder, codeElement) -> {
+            if (!hasRun.getAndSet(true)) { // this must only be run / added once on top of the method
+                var accessControl = ClassDesc.of("org.matilda.bootstrap.MatildaAccessControl");
+                var methodTypeDesc = MethodTypeDesc.ofDescriptor("(Ljava/lang/String;)V");
+
+                codeBuilder
+                        // Needs to be hard coded in order to not run into classpath issues when using MatildaAccessControl, as it is not loaded yet
+                        .ldc("Socket.bind")
+                        .invokestatic(accessControl, "checkPermission", methodTypeDesc)
+                        .with(codeElement);
+            } else {
+                codeBuilder.with(codeElement);
+                System.err.println(codeElement);
+            }
+        };
     }
 }
