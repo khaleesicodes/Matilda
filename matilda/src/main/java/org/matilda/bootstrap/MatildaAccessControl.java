@@ -36,7 +36,7 @@ import java.util.regex.Pattern;
  */
 // Class is final for security reasons, to supress any manipulation
 public final class MatildaAccessControl {
-    // TODO: it would be nice if the configuration would not require the module prefix
+    // TODO implement option that spare the need of using the module prefix
     // TODO: replace the Allowed modules with a simple check for "java.base"
     // TODO: Fix, potential circular dependency
     // List of System.class Modules, only Modules that are of interest
@@ -45,6 +45,7 @@ public final class MatildaAccessControl {
     private final Set<String> systemExitAllowPermissions;
     private final Set<String> systemExecAllowPermissions;
     private final Set<String> networkConnectAllowPermissions;
+    private final Set<String> serverSocketBindAllowPermissions;
     private static final Logger logger = Logger.getLogger(MatildaAccessControl.class.getName());
 
     /**
@@ -72,6 +73,7 @@ public final class MatildaAccessControl {
                         case "matilda.runtime.exit.allow":
                         case "matilda.system.exec.allow":
                         case "matilda.network.connect.allow":
+                        case "matilda.server.bind.allow":
                         case "matilda.bootstrap.jar":
                             break;
                         default: throw new IllegalArgumentException(elem + " is not a valid key. Allowed keys are: matilda.runtime.exit.allow, matilda.system.exec.allow,matilda.network.connect.allow");
@@ -84,6 +86,8 @@ public final class MatildaAccessControl {
         String systemExistAllow = properties.getProperty("matilda.runtime.exit.allow", "");
         String systemExecAllow = properties.getProperty("matilda.system.exec.allow", "");
         String networkConnectAllow = properties.getProperty("matilda.network.connect.allow", "");
+        String serverSocketBindAllow = properties.getProperty("matilda.server.bind.allow", "");
+
 
         // Loading and validation of set configuration
         this.systemExitAllowPermissions = validateModuleConfig(
@@ -92,6 +96,9 @@ public final class MatildaAccessControl {
                 systemExecAllow.isEmpty()? Set.of() : Set.of(systemExecAllow.split(",")));
         this.networkConnectAllowPermissions = validateModuleConfig(
                 networkConnectAllow.isEmpty() ? Set.of() : Set.of(networkConnectAllow.split(",")));
+        this.serverSocketBindAllowPermissions = validateModuleConfig(
+                serverSocketBindAllow.isEmpty() ? Set.of() : Set.of(serverSocketBindAllow.split(","))
+        );
     }
 
     /**
@@ -145,6 +152,11 @@ public final class MatildaAccessControl {
                     throw new RuntimeException("Socket.connect not allowed for Module: " +  getModuleName(callingModule));
                 }
                 else return;
+            case "ServerSocket.bind":
+                if (!checkSocketBindPermission(callingModule)) {
+                    throw new RuntimeException("ServerSocket.bind not allowed for Module: " +  getModuleName(callingModule));
+                }
+                else return;
             default:
                 throw new IllegalArgumentException("Unknown method: " + method);
         }
@@ -188,6 +200,17 @@ public final class MatildaAccessControl {
     private boolean checkSocketPermission(Module callingModule) {
         logger.log(Level.FINE, "Module that initially called the method {0} ", callingModule);
         return this.networkConnectAllowPermissions.contains(callingModule.toString());
+    }
+
+
+    /**
+     * Checks if caller has permission to call Socket.bind()
+     *@return boolean - true iff caller module has the right permissions otherwise false
+     *@see #callingClassModule() for reference how the caller module is identified
+     */
+    private boolean checkSocketBindPermission(Module callingModule) {
+        logger.log(Level.FINE, "Module that initially called the method {0} ", callingModule);
+        return this.serverSocketBindAllowPermissions.contains(callingModule.toString());
     }
 
     /**

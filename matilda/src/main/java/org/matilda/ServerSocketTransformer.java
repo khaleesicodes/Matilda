@@ -66,7 +66,7 @@ public class ServerSocketTransformer implements MatildaCodeTransformer{
         return (codeBuilder, codeElement) -> {
             if (!hasRun.getAndSet(true)) { // this must only be run / added once on top of the method
                 var accessControl = ClassDesc.of("org.matilda.bootstrap.MatildaAccessControl");
-                var methodTypeDesc = MethodTypeDesc.ofDescriptor("(Ljava/lang/String;)V");
+                var methodTypeDesc = MethodTypeDesc.ofDescriptor("(Ljava/net/SocketAddress;)V");
 
                 codeBuilder
                         // Needs to be hard coded in order to not run into classpath issues when using MatildaAccessControl, as it is not loaded yet

@@ -4,7 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d72e4b3a-fd1d-4e22-af64-55feef8d2383" name="Changes" comment="" />
+    <list default="true" id="d72e4b3a-fd1d-4e22-af64-55feef8d2383" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../matilda/src/main/java/org/matilda/AgentMatilda.java" beforeDir="false" afterPath="$PROJECT_DIR$/../matilda/src/main/java/org/matilda/AgentMatilda.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../matilda/src/main/java/org/matilda/MatildaCodeTransformer.java" beforeDir="false" afterPath="$PROJECT_DIR$/../matilda/src/main/java/org/matilda/MatildaCodeTransformer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../matilda/src/main/java/org/matilda/NetworkSocketTransformer.java" beforeDir="false" afterPath="$PROJECT_DIR$/../matilda/src/main/java/org/matilda/NetworkSocketTransformer.java" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />

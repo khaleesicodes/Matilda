@@ -199,7 +199,9 @@ public class AgentMatildaTest {
     @Test
     public void serverSocketTest() throws IOException {
 
-
+    try (ServerSocket serverSocket = new ServerSocket()) {
+        serverSocket.bind(new InetSocketAddress("localhost", 0));
+    }
 
     }
 
