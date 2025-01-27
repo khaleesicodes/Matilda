@@ -196,13 +196,26 @@ public class AgentMatildaTest {
         Assertions.assertEquals("Socket.connect not allowed for Module: matilda.test", exception_url.getMessage());
     }
 
+
+
     @Test
-    public void serverSocketTest() throws IOException {
+    public void serverSocketTest() throws IOException{
+        RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> {
+            Socket socket = new Socket("localhost", 9999);
+            Assertions.fail("should not have been able to open a connection");
+        });
+        Assertions.assertEquals("ServerSocket.bind not allowed for Module: matilda.test", exception.getMessage());
 
-    try (ServerSocket serverSocket = new ServerSocket()) {
-        serverSocket.bind(new InetSocketAddress("localhost", 0));
-    }
-
-    }
-
-}
+        // Tests if matilda also protects against the use of reflections
+        RuntimeException uOE = Assertions.assertThrows(RuntimeException.class, () -> {
+            Class<?> aClass = Class.forName("java.net.ServerSocket");
+            var ctor = aClass.getConstructor(String.class, int.class);
+            try {
+                ctor.newInstance("localhost", 9999);
+            } catch (InvocationTargetException e) {
+                throw e.getCause();
+            }
+            Assertions.fail("should not have been able to open a connection");
+        });
+        Assertions.assertEquals("ServerSocket.bind not allowed for Module: matilda.test", uOE.getMessage());
+    }}

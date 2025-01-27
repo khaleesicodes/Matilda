@@ -49,6 +49,8 @@ public final class AgentMatilda {
     public static void premain(String agentArgs, Instrumentation inst) throws IOException, UnmodifiableClassException {
         // Path to bootstrap jar that will be needed later
         var bootStrapJarPath = System.getProperty("matilda.bootstrap.jar");
+        // check if bootstrap jar is present
+        //TODO Addd check to ensure that nothing else was added to the bootstrap path
         if (bootStrapJarPath == null) {
             throw new IllegalStateException("No matilda.bootstrap.jar file specified");
         }
@@ -72,6 +74,8 @@ public final class AgentMatilda {
                         return processClasses(classBytes, new SystemExecTransformer());
                     case "java/net/Socket":
                         return processClasses(classBytes, new NetworkSocketTransformer());
+                    case "java/net/socket/ServerSocket":
+                        return processClasses(classBytes, new ServerSocketTransformer());
                     default:
                         return null;
                 }

@@ -29,6 +29,7 @@ import java.util.function.Predicate;
  */
 @SuppressWarnings("preview")
 public class SystemExecTransformer implements MatildaCodeTransformer {
+    // Boolean indicates if a transformation has been run
     private final AtomicBoolean hasRun = new AtomicBoolean(false);
 
     /**

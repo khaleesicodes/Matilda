@@ -30,6 +30,7 @@ import java.util.function.Predicate;
  */
 
 public class ServerSocketTransformer implements MatildaCodeTransformer{
+    // Boolean indicates if a transformation has been run
     private final AtomicBoolean hasRun = new AtomicBoolean(false);
 
     /**
