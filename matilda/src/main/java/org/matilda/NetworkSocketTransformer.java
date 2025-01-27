@@ -48,7 +48,6 @@ public class NetworkSocketTransformer implements MatildaCodeTransformer{
                         .with(codeElement);
             } else {
                 codeBuilder.with(codeElement);
-                System.err.println(codeElement);
             }
         };
     }

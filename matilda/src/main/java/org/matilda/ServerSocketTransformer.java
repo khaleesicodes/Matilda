@@ -54,7 +54,7 @@ public class ServerSocketTransformer implements MatildaCodeTransformer{
                     // Matches Methode
                     && "bind".equals(methodElements.methodName().stringValue())
                     // Matches Method Type
-                    && "(Ljava/net/SocketAddress;)V".equals(methodElements.methodType().stringValue());
+                    && "(Ljava/net/SocketAddress;I)V".equals(methodElements.methodType().stringValue());
         };
     }
 
@@ -76,7 +76,6 @@ public class ServerSocketTransformer implements MatildaCodeTransformer{
                         .with(codeElement);
             } else {
                 codeBuilder.with(codeElement);
-                System.err.println(codeElement);
             }
         };
     }

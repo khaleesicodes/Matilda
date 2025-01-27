@@ -74,7 +74,7 @@ public final class AgentMatilda {
                         return processClasses(classBytes, new SystemExecTransformer());
                     case "java/net/Socket":
                         return processClasses(classBytes, new NetworkSocketTransformer());
-                    case "java/net/socket/ServerSocket":
+                    case "java/net/ServerSocket":
                         return processClasses(classBytes, new ServerSocketTransformer());
                     default:
                         return null;
