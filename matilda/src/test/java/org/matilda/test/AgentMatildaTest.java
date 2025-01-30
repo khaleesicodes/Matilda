@@ -199,13 +199,12 @@ public class AgentMatildaTest {
 
 
     @Test
-    public void serverSocketTest() throws IOException{
+    public void serverSocketTest() {
         RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> {
             try (ServerSocket serverSocket = new ServerSocket()) {
                 serverSocket.bind(new InetSocketAddress("localhost", 0));
-                Assertions.fail("should not have been able to open a connection");
+                Assertions.fail("should not have been able to bind a Socket");
             }
         });
-        Assertions.assertEquals("Socket.connect not allowed for Module: matilda.test", exception.getMessage());
-
+        Assertions.assertEquals("ServerSocket.bind not allowed for Module: matilda.test", exception.getMessage());
     }}

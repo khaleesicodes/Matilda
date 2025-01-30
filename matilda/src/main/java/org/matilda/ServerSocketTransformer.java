@@ -50,11 +50,13 @@ public class ServerSocketTransformer implements MatildaCodeTransformer{
             // Get class method is an element of
             String internalName = methodElements.parent().get().thisClass().asInternalName();
             // Check if its parent is the ServerSocket Class
-            return internalName.equals("java/net/ServerSocket")
+            var retval = internalName.equals("java/net/ServerSocket")
                     // Matches Methode
                     && "bind".equals(methodElements.methodName().stringValue())
                     // Matches Method Type
                     && "(Ljava/net/SocketAddress;I)V".equals(methodElements.methodType().stringValue());
+
+            return retval;
         };
     }
 
@@ -67,11 +69,11 @@ public class ServerSocketTransformer implements MatildaCodeTransformer{
         return (codeBuilder, codeElement) -> {
             if (!hasRun.getAndSet(true)) { // this must only be run / added once on top of the method
                 var accessControl = ClassDesc.of("org.matilda.bootstrap.MatildaAccessControl");
-                var methodTypeDesc = MethodTypeDesc.ofDescriptor("(Ljava/net/SocketAddress;)V");
+                var methodTypeDesc = MethodTypeDesc.ofDescriptor("(Ljava/lang/String;)V");
 
                 codeBuilder
                         // Needs to be hard coded in order to not run into classpath issues when using MatildaAccessControl, as it is not loaded yet
-                        .ldc("Socket.bind")
+                        .ldc("ServerSocket.bind")
                         .invokestatic(accessControl, "checkPermission", methodTypeDesc)
                         .with(codeElement);
             } else {

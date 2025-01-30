@@ -209,7 +209,6 @@ public final class MatildaAccessControl {
      *@see #callingClassModule() for reference how the caller module is identified
      */
     private boolean checkSocketBindPermission(Module callingModule) {
-        System.out.println("Made it");
         logger.log(Level.FINE, "Module that initially called the method {0} ", callingModule);
         return this.serverSocketBindAllowPermissions.contains(callingModule.toString());
     }
