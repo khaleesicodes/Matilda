@@ -137,29 +137,38 @@ public class AgentMatildaTest {
         AtomicBoolean hasRead = new AtomicBoolean(false);
         // Create latch in order to allow thread to wait for other operation before continuing
         CountDownLatch latch = new CountDownLatch(1);
+        CountDownLatch read = new CountDownLatch(1);
+
         // Create reference grant access to the socket to obtain the socket port and to stop the socket
         AtomicReference<ServerSocket> socketRef = new AtomicReference<>();
         Thread server = new Thread(() -> {
             try (ServerSocket serverSocket = new ServerSocket()) {
                 socketRef.set(serverSocket);
-                serverSocket.bind(new InetSocketAddress("localhost", 0));
+                ModuleProxy.call(serverSocket, ServerSocket.class.getMethod("bind", SocketAddress.class),
+                        new InetSocketAddress("localhost", 0));
                 latch.countDown();
                 // checks if connection to socket was requested
                 try (Socket accept = serverSocket.accept()) {
-
                     try (InputStream stream = accept.getInputStream()) {
                         BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
                         Assertions.assertEquals("Test connection", reader.readLine());
                         hasRead.set(true);
                     }
                 }
-            } catch (IOException e) {
+            } catch (IOException | NoSuchMethodException e) {
                 if (socketRef.get().isClosed()) {
                     // ignore
                 } else {
                     throw new RuntimeException(e);
                 }
+            } catch (InvocationTargetException e) {
+                throw new RuntimeException(e);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            } finally {
+                read.countDown();
             }
+
         });
         server.start();
         latch.await();
@@ -173,6 +182,7 @@ public class AgentMatildaTest {
         try(Socket clientSocket = ModuleProxy.call(networkClassConstructor,"localhost", port)){
             clientSocket.getOutputStream().write("Test connection".getBytes());
         };
+        read.await();
         // checks if the clientSocket was able to connect to the server
         Assertions.assertTrue(hasRead.get(), "Socket connect has been blocked");
 

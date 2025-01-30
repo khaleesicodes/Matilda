@@ -84,7 +84,9 @@ test {
     jvmArgs += ["--enable-preview","-javaagent:${project.rootDir}/build/libs/matilda-agent-${version}.jar",
                 "-Dmatilda.bootstrap.jar=${project.rootDir}/build/libs/matilda-bootstrap-${version}.jar",
                 // needs to be allowed so gradle worker can exit and negative Test cases work
-                "-Dmatilda.runtime.exit.allow=module gradle.worker", "-Dmatilda.system.exec.allow=module matilda.core", "-Dmatilda.network.connect.allow=module matilda.core"]
+                "-Dmatilda.runtime.exit.allow=module gradle.worker", "-Dmatilda.system.exec.allow=module matilda.core",
+                "-Dmatilda.network.connect.allow=module matilda.core",
+                "-Dmatilda.server.bind.allow=module matilda.core",]
     useJUnitPlatform()
     testLogging {
         exceptionFormat = 'full'
