@@ -107,6 +107,26 @@ class MatildaAccessControlTest {
 
     }
 
+    @Test
+    void testOpenServerSocketDenied() {
+        Properties props = new Properties();
+        MatildaAccessControl accessControl = new MatildaAccessControl(props);
+        RuntimeException uOE = Assertions.assertThrows(RuntimeException.class, () -> {
+            accessControl.checkPermissionInternal("ServerSocket.bind");
+            Assertions.fail("should not have been able to open a connection");
+        });
+        Assertions.assertEquals("ServerSocket.bind not allowed for Module: org.junit.jupiter.api", uOE.getMessage());
+
+    }
+
+    @Test
+    void testOpenServerSocketAllowed() {
+        Properties props = new Properties();
+        props.setProperty("matilda.server.bind.allow", "module org.junit.platform.commons");
+        MatildaAccessControl accessControl = new MatildaAccessControl(props);
+        accessControl.checkPermissionInternal("ServerSocket.bind");
+    }
+
 
     /**
      * Tests input validation for keys
