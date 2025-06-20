@@ -92,7 +92,9 @@ test {
                 // needs to be allowed so gradle worker can exit and negative Test cases work
                 "-Dmatilda.runtime.exit.allow=module gradle.worker", "-Dmatilda.system.exec.allow=module matilda.core",
                 "-Dmatilda.network.connect.allow=module matilda.core",
-                "-Dmatilda.server.bind.allow=module matilda.core",]
+                "-Dmatilda.server.bind.allow=module matilda.core",
+                "-Dmatilda.unsafe.memory-access.allow=module matilda.core",
+    ]
     useJUnitPlatform()
     testLogging {
         exceptionFormat = 'full'

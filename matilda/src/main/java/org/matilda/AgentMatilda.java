@@ -78,6 +78,8 @@ public final class AgentMatilda {
                         return processClasses(classBytes, new NetworkSocketTransformer());
                     case "java/net/ServerSocket":
                         return processClasses(classBytes, new ServerSocketTransformer());
+                    case "sun/misc/Unsafe":
+                        return processClasses(classBytes, new UnsafeMemoryAccessTransformer());
                     default:
                         return null;
                 }

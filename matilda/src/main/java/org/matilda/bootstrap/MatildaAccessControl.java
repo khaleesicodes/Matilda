@@ -39,12 +39,15 @@ public record MatildaAccessControl(
         Set<String> systemExitAllowPermissions,
         Set<String> systemExecAllowPermissions,
         Set<String> networkConnectAllowPermissions,
-        Set<String> serverSocketBindAllowPermissions) {
+        Set<String> serverSocketBindAllowPermissions,
+        Set<String> unsafeMemoryAccessPermissions) {
     // TODO implement option that spare the need of using the module prefix
     // TODO: replace the Allowed modules with a simple check for "java.base"
     // TODO: Fix, potential circular dependency
     // List of System.class Modules, only Modules that are of interest
-    private static final Set<Module> ALLOWED_MODULES = Set.of(System.class.getModule());
+    private static final Set<Module> ALLOWED_MODULES = Set.of(
+            System.class.getModule(),
+            ModuleLayer.boot().findModule("jdk.unsupported").orElseThrow());
     private static final MatildaAccessControl INSTANCE = new MatildaAccessControl(System.getProperties());
     private static final Logger logger = Logger.getLogger(MatildaAccessControl.class.getName());
 
@@ -74,6 +77,7 @@ public record MatildaAccessControl(
                         case "matilda.system.exec.allow":
                         case "matilda.network.connect.allow":
                         case "matilda.server.bind.allow":
+                        case "matilda.unsafe.memory-access.allow":
                         case "matilda.bootstrap.jar":
                             break;
                         default: throw new IllegalArgumentException(elem + " is not a valid key. Allowed keys are: matilda.runtime.exit.allow, matilda.system.exec.allow,matilda.network.connect.allow");
@@ -87,6 +91,7 @@ public record MatildaAccessControl(
         String systemExecAllow = properties.getProperty("matilda.system.exec.allow", "");
         String networkConnectAllow = properties.getProperty("matilda.network.connect.allow", "");
         String serverSocketBindAllow = properties.getProperty("matilda.server.bind.allow", "");
+        String unsafeMemoryAccessAllow = properties.getProperty("matilda.unsafe.memory-access.allow", "");
 
 
         // Loading and validation of set configuration
@@ -97,8 +102,9 @@ public record MatildaAccessControl(
             validateModuleConfig(
                 networkConnectAllow.isEmpty() ? Set.of() : Set.of(networkConnectAllow.split(","))),
             validateModuleConfig(
-                serverSocketBindAllow.isEmpty() ? Set.of() : Set.of(serverSocketBindAllow.split(","))
-        ));
+                serverSocketBindAllow.isEmpty() ? Set.of() : Set.of(serverSocketBindAllow.split(","))),
+            validateModuleConfig(unsafeMemoryAccessAllow.isEmpty() ? Set.of(): Set.of(unsafeMemoryAccessAllow.split(",")))
+        );
     }
 
     /*
@@ -114,6 +120,9 @@ public record MatildaAccessControl(
         throw new UnsupportedOperationException();
     }
     public Set<String> serverSocketBindAllowPermissions() {
+        throw new UnsupportedOperationException();
+    }
+    public Set<String> unsafeMemoryAccessPermissions() {
         throw new UnsupportedOperationException();
     }
 
@@ -173,6 +182,10 @@ public record MatildaAccessControl(
                     throw new RuntimeException("ServerSocket.bind not allowed for Module: " +  getModuleName(callingModule));
                 }
                 else return;
+            case "Unsafe.beforeMemoryAccess":
+                if (!checkUnsafeMemoryAccessPermission(callingModule))
+                    throw new RuntimeException("Unsafe memory access not allowed for Module: " +  getModuleName(callingModule));
+                else return;
             default:
                 throw new IllegalArgumentException("Unknown method: " + method);
         }
@@ -227,6 +240,17 @@ public record MatildaAccessControl(
     private boolean checkSocketBindPermission(Module callingModule) {
         logger.log(Level.FINE, "Module that initially called the method {0} ", callingModule);
         return this.serverSocketBindAllowPermissions.contains(callingModule.toString());
+    }
+
+
+    /**
+     * Checks if caller has permission to access memory via Unsafe
+     *@return boolean - true iff caller module has the right permissions otherwise false
+     *@see #callingClassModule() for reference how the caller module is identified
+     */
+    private boolean checkUnsafeMemoryAccessPermission(Module callingModule) {
+        logger.log(Level.FINE, "Module that initially called the method {0} ", callingModule);
+        return this.unsafeMemoryAccessPermissions.contains(callingModule.toString());
     }
 
     /**

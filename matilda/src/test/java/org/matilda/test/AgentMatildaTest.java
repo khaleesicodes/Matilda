@@ -23,6 +23,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.matilda.bootstrap.MatildaAccessControl;
 import org.matilda.bootstrap.ModuleProxy;
+import sun.misc.Unsafe;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -44,6 +45,8 @@ import java.util.stream.Stream;
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class AgentMatildaTest {
+
+    private Object someState;
 
     @Test
     public void testSystemExitTransformer()  {
@@ -286,13 +289,9 @@ public class AgentMatildaTest {
     @Test
     public void openBootstrapPackageIsNotExploitableBySettingInstance() {
         String msg = Assertions.assertThrows(IllegalAccessException.class, () -> {
-            Class<?> macClass = Class.forName(MatildaAccessControl.class.getName(), false, null);
 
-            Set<String> thisModule = Set.of(this.getClass().getModule().toString());
-            Object mac = macClass.getConstructor(Set.class, Set.class, Set.class, Set.class)
-                    .newInstance(thisModule, thisModule, thisModule, thisModule);
-
-            Field instance = macClass.getDeclaredField("INSTANCE");
+            Object mac = createMac();
+            Field instance = mac.getClass().getDeclaredField("INSTANCE");
             instance.setAccessible(true);
             instance.set(null, mac);
 
@@ -303,6 +302,64 @@ public class AgentMatildaTest {
                 "Can not set static final org.matilda.bootstrap.MatildaAccessControl field org.matilda.bootstrap.MatildaAccessControl.INSTANCE to org.matilda.bootstrap.MatildaAccessControl"
                 , msg
         );
+    }
+
+    private Object createMac() throws ReflectiveOperationException {
+        Set<String> thisModule = Set.of(this.getClass().getModule().toString());
+        return Class.forName(MatildaAccessControl.class.getName(), false, null)
+                .getConstructor(Set.class, Set.class, Set.class, Set.class, Set.class)
+                .newInstance(thisModule, thisModule, thisModule, thisModule, thisModule);
+    }
+
+    @Test
+    @SuppressWarnings("removal")
+    void preventsUnauthorizedUnsafeMemoryAccess() {
+        String msg = Assertions.assertThrows(RuntimeException.class, () -> {
+            Unsafe unsafe = getUnsafe();
+            Field instance = NorrisAccessControl.class.getDeclaredField("INSTANCE");
+
+            Object norrisBase = unsafe.staticFieldBase(instance);
+
+            //never reached if test passes
+            if (NorrisAccessControl.class != norrisBase) {
+                //VM not supported. exploit failed.
+                return; //fail
+            }
+            long instanceOffset = unsafe.staticFieldOffset(instance);
+
+            Object mac = createMac();
+            unsafe.putObjectVolatile(mac.getClass(), instanceOffset, mac);
+
+            System.exit(-5);
+        }).getMessage();
+        Assertions.assertEquals("Unsafe memory access not allowed for Module: matilda.test", msg);
+    }
+
+    private static Unsafe getUnsafe() throws ReflectiveOperationException {
+        Field fUnsafe = Unsafe.class.getDeclaredField("theUnsafe");
+        fUnsafe.setAccessible(true);
+        return (Unsafe) fUnsafe.get(null);
+    }
+
+    @Test
+    @SuppressWarnings("removal")
+    public void allowsAuthorizedUnsafeMemoryAccess() throws ReflectiveOperationException {
+        Unsafe unsafe = getUnsafe();
+        Field someStateField = this.getClass().getDeclaredField("someState");
+        Object someStateOffset = ModuleProxy.call(unsafe, Unsafe.class.getMethod("objectFieldOffset", Field.class), someStateField);
+        ModuleProxy.call(unsafe, Unsafe.class.getMethod("putObject", Object.class, long.class, Object.class), this, someStateOffset, "Works");
+
+        Assertions.assertEquals("Works", this.someState);
+    }
+
+    /**
+     * mimics the static memory layout of {@link MatildaAccessControl}
+     */
+    @SuppressWarnings("unused")
+    static class NorrisAccessControl {
+        private static final Object a = null;
+        private static final Object INSTANCE = null;
+        private static final Object b = null;
     }
 }
 
